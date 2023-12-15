@@ -2,10 +2,10 @@
     <el-container id="container">
         <!-- Title -->
         <el-header id="header">
-            <el-button type="primary" :onclick="handleChat" style="margin-left: 10px" circle>
+            <el-button type="primary" :onclick="handleSelect" style="margin-left: 10px" circle>
                 <el-icon><ChatDotRound /> </el-icon>
             </el-button>
-            <h1 id="title">AI解压小助手</h1>
+            <h1 id="title">{{ curRoleName }}</h1>
 
             <el-button type="primary" style="margin-right: 10px" circle>
                 <el-icon><Setting /> </el-icon>
@@ -14,10 +14,11 @@
 
         <div id="content-container">
             <!-- select the role of bot-->
-            <el-aside v-show="this.isShowing" style="max-width: fit-content">
-                <el-menu style="padding: 15px 0 0 15px; height: 100%">
-                    <h3 style="margin-bottom: 15px">切换角色</h3>
-                    <el-menu-item v-for="role in roleList" :key="role" @click="handleChangeRole(role.name)" style="padding: 0; margin-right: 15px">
+            <el-aside v-show="this.isSelecting" style="max-width: fit-content">
+                <!-- @select call-back function, index: value -->
+                <el-menu @select="handleCheckChangeRole" :default-active="String(this.curRoleId)" style="padding: 15px 0 0 15px; height: 100%">
+                    <h2 style="margin-bottom: 15px; font-size: large">切换角色</h2>
+                    <el-menu-item v-for="[i, role] of roleList.entries()" :key="i" :index="String(i)" style="padding: 0; margin-right: 15px">
                         <template #title>
                             <div style="display: flex; align-items: center">
                                 <img :src="getProfileUrl(role.name)" class="profile" style="height: 36px; width: 36px" />
@@ -28,12 +29,14 @@
                     <a class="comment">v0.1.0 by Fucloud</a>
                 </el-menu>
             </el-aside>
+
+            <!-- talk content -->
             <el-main style="display: flex; flex-direction: column; justify-content: space-between; padding: 0">
                 <!-- Messages Area-->
                 <el-main id="message-container">
                     <div v-for="item in messageList" :key="item" id="message-list">
                         <div class="profile">
-                            <el-image :src="botProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
+                            <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
                         </div>
                         <div class="message" :id="item.role">
                             <span>{{ item.content }}</span>
@@ -53,6 +56,15 @@
             </el-main>
         </div>
     </el-container>
+
+    <!-- dialog -->
+    <el-dialog title="提示" v-model="isChangingRole" style="min-width: 300px">
+        <a>更换角色后，之前的聊天记录会被清除，你确定要更换吗？</a>
+        <template #footer>
+            <el-button @click="isChangingRole = false">取消</el-button>
+            <el-button type="primary" @click="changeRole(this.roleToChange)"> 确定 </el-button>
+        </template>
+    </el-dialog>
 </template>
 
 <script>
@@ -68,9 +80,13 @@ export default {
     },
     data() {
         return {
-            botProfileUrl: this.getProfileUrl('bot'),
+            //init
+            initRoleId: 1,
             //status
-            isShowing: true,
+            curRoleId: -1,
+            curRoleName: '',
+            curRoleProfileUrl: null,
+            isSelecting: false,
             roleList: [
                 {
                     label: '父母',
@@ -78,7 +94,7 @@ export default {
                 },
                 {
                     label: '闺蜜',
-                    name: 'girlFriend'
+                    name: 'bestie'
                 },
                 {
                     label: '朋友',
@@ -89,6 +105,11 @@ export default {
                     name: 'doctor'
                 }
             ],
+
+            // dialog
+            isChangingRole: false,
+            roleToChange: -1,
+
             // talking
             input: '',
             messageList: [
@@ -103,6 +124,9 @@ export default {
             ]
         }
     },
+    mounted() {
+        this.changeRole(this.initRoleId)
+    },
     methods: {
         async handleSend() {
             // directly return when meet empty input
@@ -113,7 +137,6 @@ export default {
             this.pushUserMessage(this.input)
             this.input = ''
 
-            // TODO: 连接后端API
             const result = await chat(this.messageList)
             if (!result.flag) {
                 this.pushAssistantMessage(result.data)
@@ -122,10 +145,17 @@ export default {
 
             this.pushAssistantMessage(result.data)
         },
-        handleChat() {
-            this.isShowing = !this.isShowing
+        handleSelect() {
+            this.isSelecting = !this.isSelecting
         },
-        handleChangeRole() {},
+        handleCheckChangeRole(index) {
+            if (this.curRoleId == index) {
+                return
+            }
+
+            this.isChangingRole = true
+            this.roleToChange = index
+        },
         pushUserMessage(message) {
             this.pushMessage('user', message)
         },
@@ -137,6 +167,15 @@ export default {
                 role: role,
                 content: message
             })
+        },
+        changeRole(index) {
+            this.curRoleId = index
+            this.curRoleName = this.roleList[index]['label']
+            this.curRoleProfileUrl = this.getProfileUrl(this.roleList[index]['name'])
+
+            // change the status of those component
+            this.isChangingRole = false
+            this.isSelecting = false
         },
         getProfileUrl(name) {
             try {
