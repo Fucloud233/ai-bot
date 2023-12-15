@@ -2,48 +2,38 @@
     <el-container id="container">
         <!-- Title -->
         <el-header id="header">
+            <el-button type="primary" :onclick="handleChat" style="margin-left: 10px" circle>
+                <el-icon><ChatDotRound /> </el-icon>
+            </el-button>
             <h1 id="title">AI解压小助手</h1>
+
+            <el-button type="primary" style="margin-right: 10px" circle>
+                <el-icon><Setting /> </el-icon>
+            </el-button>
         </el-header>
+
         <div id="content-container">
-            <el-aside style="max-width: fit-content" v-show="false">
-                <el-menu collapse="true">
-                    <el-sub-menu index="1">
+            <!-- select the role of bot-->
+            <el-aside v-show="this.isShowing" style="max-width: fit-content">
+                <el-menu style="padding: 15px 0 0 15px; height: 100%">
+                    <h3 style="margin-bottom: 15px">切换角色</h3>
+                    <el-menu-item v-for="role in roleList" :key="role" @click="handleChangeRole(role.name)" style="padding: 0; margin-right: 15px">
                         <template #title>
-                            <el-icon><location /></el-icon>
-                            <span>Navigator One</span>
+                            <div style="display: flex; align-items: center">
+                                <img :src="getProfileUrl(role.name)" class="profile" style="height: 36px; width: 36px" />
+                                <span>{{ role.label }}</span>
+                            </div>
                         </template>
-                        <el-menu-item-group title="Group One">
-                            <el-menu-item index="1-1">item one</el-menu-item>
-                            <el-menu-item index="1-2">item two</el-menu-item>
-                        </el-menu-item-group>
-                        <el-menu-item-group title="Group Two">
-                            <el-menu-item index="1-3">item three</el-menu-item>
-                        </el-menu-item-group>
-                        <el-sub-menu index="1-4">
-                            <template #title>item four</template>
-                            <el-menu-item index="1-4-1">item one</el-menu-item>
-                        </el-sub-menu>
-                    </el-sub-menu>
-                    <el-menu-item index="2">
-                        <el-icon><icon-menu /></el-icon>
-                        <span>Navigator Two</span>
                     </el-menu-item>
-                    <el-menu-item index="3" disabled>
-                        <el-icon><document /></el-icon>
-                        <span>Navigator Three</span>
-                    </el-menu-item>
-                    <el-menu-item index="4">
-                        <el-icon><setting /></el-icon>
-                        <span>Navigator Four</span>
-                    </el-menu-item>
+                    <a class="comment">v0.1.0 by Fucloud</a>
                 </el-menu>
             </el-aside>
             <el-main style="display: flex; flex-direction: column; justify-content: space-between; padding: 0">
                 <!-- Messages Area-->
                 <el-main id="message-container">
                     <div v-for="item in messageList" :key="item" id="message-list">
-                        <div id="bot-profile">
-                            <el-image :src="botProfileUrl" v-if="item.role == 'assistant'" id="bot-profile" style="border-radius: 50%"></el-image>
+                        <div class="profile">
+                            <el-image :src="botProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
                         </div>
                         <div class="message" :id="item.role">
                             <span>{{ item.content }}</span>
@@ -56,7 +46,7 @@
                     <div id="talk-input">
                         <el-input v-model="input" type="textarea" :autosize="{ minRows: 1, maxRows: 2 }" resize="none" placeholder="输入文字与小助手交流"> </el-input>
                     </div>
-                    <el-button :onclick="handleSend" type="primary" id="send-button" style="font-size: large" circle>
+                    <el-button :onclick="handleSend" type="primary" id="send-button" circle>
                         <el-icon><Right /></el-icon>
                     </el-button>
                 </el-footer>
@@ -66,17 +56,40 @@
 </template>
 
 <script>
-import { Right } from '@element-plus/icons-vue'
+import { Right, ChatDotRound, Setting } from '@element-plus/icons-vue'
 import { chat } from '@/api'
 
 export default {
     name: 'TalkRoom',
     components: {
-        Right
+        Right,
+        ChatDotRound,
+        Setting
     },
     data() {
         return {
-            botProfileUrl: require('@/assets/botProfile.jpg'),
+            botProfileUrl: this.getProfileUrl('bot'),
+            //status
+            isShowing: true,
+            roleList: [
+                {
+                    label: '父母',
+                    name: 'parent'
+                },
+                {
+                    label: '闺蜜',
+                    name: 'girlFriend'
+                },
+                {
+                    label: '朋友',
+                    name: 'friend'
+                },
+                {
+                    label: '心理医生',
+                    name: 'doctor'
+                }
+            ],
+            // talking
             input: '',
             messageList: [
                 // {
@@ -109,7 +122,10 @@ export default {
 
             this.pushAssistantMessage(result.data)
         },
-
+        handleChat() {
+            this.isShowing = !this.isShowing
+        },
+        handleChangeRole() {},
         pushUserMessage(message) {
             this.pushMessage('user', message)
         },
@@ -121,6 +137,13 @@ export default {
                 role: role,
                 content: message
             })
+        },
+        getProfileUrl(name) {
+            try {
+                return require(`@/assets/profile/${name}.png`)
+            } catch (error) {
+                return require('@/assets/profile/bot.jpg')
+            }
         }
     }
 }
@@ -140,14 +163,16 @@ export default {
     margin: 0;
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    /* justify-content: center; */
+    justify-content: space-between;
+    align-items: center;
 }
 #title {
     /* font-size: 12; */
     font-size: 20px;
     font-family: Arial, sans-serif;
     color: white;
-    margin: 15px 0 0 0;
+    /* margin: 15px 0 0 0; */
 }
 #content-container {
     display: flex;
@@ -182,7 +207,7 @@ export default {
     color: white;
     background-color: #409eff;
 }
-#bot-profile {
+.profile {
     width: 40px;
     height: 40px;
     margin-right: 10px;
@@ -213,5 +238,16 @@ export default {
     min-width: 36px;
     min-height: 36px;
     margin: 0 5px;
+}
+.el-icon {
+    font-size: 20px;
+    color: white;
+}
+.comment {
+    position: absolute;
+    bottom: 0;
+    font-size: small;
+    color: gray;
+    margin-bottom: 10px;
 }
 </style>
