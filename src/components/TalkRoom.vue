@@ -4,28 +4,64 @@
         <el-header id="header">
             <h1 id="title">AI解压小助手</h1>
         </el-header>
+        <div id="content-container">
+            <el-aside style="max-width: fit-content" v-show="false">
+                <el-menu collapse="true">
+                    <el-sub-menu index="1">
+                        <template #title>
+                            <el-icon><location /></el-icon>
+                            <span>Navigator One</span>
+                        </template>
+                        <el-menu-item-group title="Group One">
+                            <el-menu-item index="1-1">item one</el-menu-item>
+                            <el-menu-item index="1-2">item two</el-menu-item>
+                        </el-menu-item-group>
+                        <el-menu-item-group title="Group Two">
+                            <el-menu-item index="1-3">item three</el-menu-item>
+                        </el-menu-item-group>
+                        <el-sub-menu index="1-4">
+                            <template #title>item four</template>
+                            <el-menu-item index="1-4-1">item one</el-menu-item>
+                        </el-sub-menu>
+                    </el-sub-menu>
+                    <el-menu-item index="2">
+                        <el-icon><icon-menu /></el-icon>
+                        <span>Navigator Two</span>
+                    </el-menu-item>
+                    <el-menu-item index="3" disabled>
+                        <el-icon><document /></el-icon>
+                        <span>Navigator Three</span>
+                    </el-menu-item>
+                    <el-menu-item index="4">
+                        <el-icon><setting /></el-icon>
+                        <span>Navigator Four</span>
+                    </el-menu-item>
+                </el-menu>
+            </el-aside>
+            <el-main style="display: flex; flex-direction: column; justify-content: space-between; padding: 0">
+                <!-- Messages Area-->
+                <el-main id="message-container">
+                    <div v-for="item in messageList" :key="item" id="message-list">
+                        <div id="bot-profile">
+                            <el-image :src="botProfileUrl" v-if="item.role == 'assistant'" id="bot-profile" style="border-radius: 50%"></el-image>
+                        </div>
+                        <div class="message" :id="item.role">
+                            <span>{{ item.content }}</span>
+                        </div>
+                    </div>
+                </el-main>
 
-        <!-- Messages Area-->
-        <el-main id="message-container">
-            <div v-for="item in messageList" :key="item" id="message-list">
-                <div id="bot-profile">
-                    <el-image :src="botProfileUrl" v-if="item.role == 'assistant'" id="bot-profile" style="border-radius: 50%"></el-image>
-                </div>
-                <div class="message" :id="item.role">
-                    <span>{{ item.content }}</span>
-                </div>
-            </div>
-        </el-main>
-
-        <!-- Talk  Area -->
-        <el-footer id="talk-container">
-            <div id="talk-input">
-                <el-input v-model="input" type="textarea" :autosize="{ minRows: 1, maxRows: 2 }" resize="none" placeholder="输入文字与小助手交流"> </el-input>
-            </div>
-            <el-button :onclick="handleSend" type="primary" id="send-button" style="font-size: large" circle>
-                <el-icon><Right /></el-icon>
-            </el-button>
-        </el-footer>
+                <!-- Talk  Area -->
+                <el-footer id="talk-container">
+                    <div id="talk-input">
+                        <el-input v-model="input" type="textarea" :autosize="{ minRows: 1, maxRows: 2 }" resize="none" placeholder="输入文字与小助手交流"> </el-input>
+                    </div>
+                    <el-button :onclick="handleSend" type="primary" id="send-button" style="font-size: large" circle>
+                        <el-icon><Right /></el-icon>
+                    </el-button>
+                </el-footer>
+            </el-main>
+        </div>
     </el-container>
 </template>
 
@@ -96,7 +132,6 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100%;
-    justify-content: space-around;
 }
 
 #header {
@@ -113,6 +148,11 @@ export default {
     font-family: Arial, sans-serif;
     color: white;
     margin: 15px 0 0 0;
+}
+#content-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
 }
 
 #message-container {
