@@ -31,7 +31,7 @@
             </el-aside>
 
             <!-- talk content -->
-            <el-main style="display: flex; flex-direction: column; justify-content: space-between; padding: 0">
+            <div style="display: flex; flex-direction: column; padding: 0; width: 100%">
                 <!-- Messages Area-->
                 <el-main id="message-container">
                     <div v-for="item in messageList" :key="item" id="message-list">
@@ -53,7 +53,7 @@
                         <el-icon><Right /></el-icon>
                     </el-button>
                 </el-footer>
-            </el-main>
+            </div>
         </div>
     </el-container>
 
@@ -198,11 +198,13 @@ export default {
 
 #header {
     background-color: #409eff;
+
+    height: 8%;
     padding: 0;
     margin: 0;
+
     display: flex;
     flex-direction: row;
-    /* justify-content: center; */
     justify-content: space-between;
     align-items: center;
 }
@@ -216,13 +218,15 @@ export default {
 #content-container {
     display: flex;
     flex-direction: row;
-    height: 100%;
+    height: 92%;
 }
 
 #message-container {
     display: flex;
     flex-direction: column;
     padding: 20px;
+    max-height: 90%;
+    width: 100%;
 }
 #message-list {
     display: flex;
