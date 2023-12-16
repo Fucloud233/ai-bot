@@ -2,7 +2,7 @@ from flask import Flask, request, send_file, make_response
 # https://segmentfault.com/a/1190000024515972
 from flask_cors import CORS
 
-from bot import Bot
+from bot import Bot, BotRole
 from typing import List
 
 
@@ -16,6 +16,10 @@ def gen_return_msg(msg: str, status_code: int=200):
     response = make_response(msg)
     response.status_code = status_code
     return response
+
+def check_messages(messages):
+    if type(messages) != list:
+        raise TypeError("The format of messages is incorrect!")
 
 # post request
 @app.route("/chat", methods=['POST'])
@@ -31,6 +35,26 @@ def chat():
         return gen_return_msg(repr(e), 400)
 
     return gen_return_msg(result)
-         
+
+@app.route("/chat/<string:role_name>", methods=['POST'])
+def chat_with_role(role_name):
+    try:
+        # get the role
+        role = BotRole.new(role_name)
+
+        # get and check message
+        messages = request.json['messages']
+        check_messages(messages)
+
+        # generate and return result
+        result = bot.talk_with_role(messages, role)
+        return gen_return_msg(result)
+    except ValueError as e:
+        return gen_return_msg(f"Role '{role_name}' not found", 404)
+    except TypeError as e:
+        print(e.with_traceback())
+        return gen_return_msg(repr(e), 400)
+        
+
 if __name__ == '__main__':
-    app.run(port=8081, host="0.0.0.0", debug=False)
+    app.run(port=6061, host="0.0.0.0", debug=True)
