@@ -1,21 +1,47 @@
 package service
 
 import (
+	"net/http"
+
 	"example.com/m/v2/model"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
+// func CreateUser(c *gin.Context) {
+// 	user := model.UserBasic{}
+// 	user.Phone = c.Query("phone")
+// 	user.Password = c.Query("password")
+// 	err := model.CreateUser(&user)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{})
+// 	} else {
+// 		c.JSON(http.StatusOK, gin.H{})
+// 	}
+// }
+
 func CreateUser(c *gin.Context) {
-	user := model.UserBasic{}
-	user.Phone = c.Query("phone")
-	user.Password = c.Query("password")
-	err := model.CreateUser(&user)
+	var user model.UserBasic
+	err := c.ShouldBindJSON(&user)
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{})
-	} else {
-		c.JSON(http.StatusOK, gin.H{})
+		c.JSON(http.StatusBadRequest, gin.H{})
+		return
 	}
+
+	if user.CheckExist() {
+		c.JSON(http.StatusBadRequest, "user has existed")
+		return
+	}
+
+	err1 := model.CreateUser(&user)
+	err2 := model.InitRoles(user.Phone)
+	
+	status := http.StatusOK
+	if err1 != nil && err2 != nil {
+		status = http.StatusInternalServerError
+	}
+
+	c.JSON(status, "")
 }
 
 func Login(c *gin.Context) {
