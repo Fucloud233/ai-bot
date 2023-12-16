@@ -1,2 +1,0 @@
-mysql:
-  dns: wangj:wangj865@tcp(172.27.0.1:3306)/aibot?charset=utf8mb4&parseTime=True&loc=Local
