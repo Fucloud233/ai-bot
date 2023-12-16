@@ -24,6 +24,13 @@ class BotRole(Enum):
 
     def new(role_name): 
         return BotRole(role_name)
+    
+    def get_label(self) -> str:
+        match self:
+            case BotRole.Parent: return "父母"
+            case BotRole.Bestie: return "闺蜜"
+            case BotRole.Friend: return "朋友"
+            case BotRole.Doctor: return "心理医生"
 
 class Bot:
     @staticmethod
@@ -37,19 +44,14 @@ class Bot:
     
     @staticmethod
     def talk_with_role(messages: List[str], bot_role: BotRole, model_kind: ModelKind=ModelKind.Ernie):
-        prompts = wrap_prompt(get_prompt(bot_role))
+        prompts = wrap_prompt(gen_prompt(bot_role))
         prompts.extend(messages)
 
         return Bot.talk(prompts, model_kind)
 
-def get_prompt(bot_role: BotRole):
-    match bot_role:
-        case BotRole.Parent: role_name = "父母"
-        case BotRole.Bestie: role_name = "闺蜜"
-        case BotRole.Friend: role_name = "朋友"
-        case BotRole.Doctor: role_name = "心理医生"
-    
-    role_prompt = f"你现在是我的{role_name}。"
+def gen_prompt(bot_role: BotRole):
+    label = bot_role.get_label()
+    role_prompt = f"你现在是我的{label}。"
     
     basic_prompt = "我现在学习、工作或者生活上有点压力，请你帮我缓解一下我和压力和焦虑。" \
         "请控制你的输出结果不要过长。"
