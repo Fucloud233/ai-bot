@@ -2,10 +2,10 @@
     <el-container id="container">
         <!-- Title -->
         <el-header id="header">
-            <el-button type="primary" :onclick="handleSelect" style="margin-left: 10px" circle>
+            <el-button type="primary" @click="this.isSelecting = !this.isSelecting" style="margin-left: 10px" circle>
                 <el-icon><ChatDotRound /> </el-icon>
             </el-button>
-            <h1 id="title">{{ curRoleName }}</h1>
+            <h1 id="title">{{ curRoleLabel }}</h1>
 
             <el-button type="primary" style="margin-right: 10px" circle>
                 <el-icon><Setting /> </el-icon>
@@ -69,7 +69,7 @@
 
 <script>
 import { Right, ChatDotRound, Setting } from '@element-plus/icons-vue'
-import { chat } from '@/api'
+import { chatWithRole } from '@/api'
 
 export default {
     name: 'TalkRoom',
@@ -84,7 +84,7 @@ export default {
             initRoleId: 1,
             //status
             curRoleId: -1,
-            curRoleName: '',
+            curRoleLabel: '',
             curRoleProfileUrl: null,
             isSelecting: false,
             roleList: [
@@ -137,16 +137,14 @@ export default {
             this.pushUserMessage(this.input)
             this.input = ''
 
-            const result = await chat(this.messageList)
+            const roleName = this.roleList[this.curRoleId].name
+            const result = await chatWithRole(this.messageList, roleName)
             if (!result.flag) {
                 this.pushAssistantMessage(result.data)
                 return
             }
 
             this.pushAssistantMessage(result.data)
-        },
-        handleSelect() {
-            this.isSelecting = !this.isSelecting
         },
         handleCheckChangeRole(index) {
             if (this.curRoleId == index) {
@@ -170,7 +168,7 @@ export default {
         },
         changeRole(index) {
             this.curRoleId = index
-            this.curRoleName = this.roleList[index]['label']
+            this.curRoleLabel = this.roleList[index]['label']
             this.curRoleProfileUrl = this.getProfileUrl(this.roleList[index]['name'])
 
             // change the status of those component
