@@ -34,12 +34,14 @@
             <div style="display: flex; flex-direction: column; padding: 0; width: 100%">
                 <!-- Messages Area-->
                 <el-main id="message-container">
-                    <div v-for="item in messageList" :key="item" id="message-list">
+                    <div v-for="[i, item] of messageList.entries()" :key="i" id="message-list">
                         <div class="profile">
                             <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
                         </div>
                         <div class="message" :id="item.role">
-                            <span>{{ item.content }}</span>
+                            <div v-loading="checkNeedLoading(i)" style="min-width: 30px" element-loading-background="#f1f1f1">
+                                <span>{{ item.content }}</span>
+                            </div>
                         </div>
                     </div>
                 </el-main>
@@ -87,6 +89,7 @@ export default {
             curRoleLabel: '',
             curRoleProfileUrl: null,
             isSelecting: false,
+            isReceiving: false,
             roleList: [
                 {
                     label: '父母',
@@ -119,7 +122,7 @@ export default {
                 // },
                 // {
                 //     role: 'assistant',
-                //     content: '你好，请问有什么可以帮到你的'
+                //     content: ''
                 // }
             ]
         }
@@ -130,21 +133,28 @@ export default {
     methods: {
         async handleSend() {
             // directly return when meet empty input
-            if (this.input.length == 0) {
+            if (this.input.length == 0 || this.isReceiving) {
                 return
             }
 
             this.pushUserMessage(this.input)
             this.input = ''
 
+            // append empty message
+            this.isReceiving = true
+            this.pushAssistantMessage('')
+
+            // receive message
             const roleName = this.roleList[this.curRoleId].name
-            const result = await chatWithRole(this.messageList, roleName)
+            const result = await chatWithRole(this.messageList.slice(0, -1), roleName)
             if (!result.flag) {
-                this.pushAssistantMessage(result.data)
+                // this.pushAssistantMessage(result.data)
+                this.modifyLastMessage('不好意思，我有点事情，稍后再回复你。')
                 return
             }
-
-            this.pushAssistantMessage(result.data)
+            // update the message
+            this.modifyLastMessage(result.data)
+            this.isReceiving = false
         },
         handleCheckChangeRole(index) {
             if (this.curRoleId == index) {
@@ -166,6 +176,9 @@ export default {
                 content: message
             })
         },
+        modifyLastMessage(message) {
+            this.messageList[this.messageList.length - 1].content = message
+        },
         changeRole(index) {
             this.curRoleId = index
             this.curRoleLabel = this.roleList[index]['label']
@@ -181,6 +194,9 @@ export default {
             } catch (error) {
                 return require('@/assets/profile/bot.jpg')
             }
+        },
+        checkNeedLoading(index) {
+            return this.isReceiving && index === this.messageList.length - 1
         }
     }
 }
@@ -228,15 +244,23 @@ export default {
 }
 #message-list {
     display: flex;
+    margin-bottom: 10px;
 }
 
 #message-container .message {
     display: flex;
     padding: 10px 12px;
-    margin-bottom: 10px;
     border-radius: 10px;
     max-width: 60%;
     font-size: 16px;
+
+    /* modify the loading icon */
+    /* :deep(.el-loading-spinner .path) {
+        stroke: black;
+    } */
+    :deep(.el-loading-spinner .circular) {
+        width: 30px;
+    }
 }
 #assistant {
     margin-right: auto;
