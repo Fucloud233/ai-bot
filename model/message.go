@@ -3,15 +3,15 @@ package model
 import "time"
 
 type Message struct {
-	Phone string
-	Role string
-	BotRole string
-	Time time.Time
-	Content string
+	Phone string `json: "phone" binding: "-"`
+	Role string `json: "role"`
+	BotRole string `json: "bot_role" binding: "-"`
+	Time time.Time `json: "time"`
+	Content string `json: "content"`
 }
 
-func (message *Message) AddMessage() {
-	DB.Create(&message)
+func AddMessages(messages *[]Message) error {
+	return DB.Create(&messages).Error
 }
 
 func (message *Message) GetNewestMessage(n int) {
