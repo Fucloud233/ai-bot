@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"example.com/m/v2/model"
+	"ai-bot/model"
 	"fmt"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
@@ -13,7 +13,7 @@ import (
 )
 
 func InitConfig() {
-	viper.SetConfigName("aibot")
+	viper.SetConfigName("ai")
 	viper.AddConfigPath("config")
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -31,6 +31,7 @@ func InitMySQL() {
 			Colorful:      true,
 		},
 	)
+	fmt.Println("连接数据库", viper.GetString("mysql.dns"))
 	model.DB, _ = gorm.Open(mysql.Open(viper.GetString("mysql.dns")),
 		&gorm.Config{Logger: newLogger})
 	fmt.Println("MySQL inited.", viper.GetString("mysql"))

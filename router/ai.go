@@ -1,7 +1,7 @@
 package router
 
 import (
-	"example.com/m/v2/service"
+	"ai-bot/service"
 	"github.com/gin-gonic/gin"
 )
 

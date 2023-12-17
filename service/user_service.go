@@ -1,22 +1,22 @@
 package service
 
 import (
-	"example.com/m/v2/model"
+	"ai-bot/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func CreateUser(c *gin.Context) {
-	user := model.UserBasic{}
-	user.Phone = c.Query("phone")
-	user.Password = c.Query("password")
-	err := model.CreateUser(&user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{})
-	} else {
-		c.JSON(http.StatusOK, gin.H{})
-	}
-}
+//func CreateUser(c *gin.Context) {
+//	user := model.UserBasic{}
+//	user.Phone = c.Query("phone")
+//	user.Password = c.Query("password")
+//	err := model.CreateUser(&user)
+//	if err != nil {
+//		c.JSON(http.StatusInternalServerError, gin.H{})
+//	} else {
+//		c.JSON(http.StatusOK, gin.H{})
+//	}
+//}
 
 func Login(c *gin.Context) {
 	user := model.UserBasic{}
@@ -35,6 +35,11 @@ func Login(c *gin.Context) {
 	} else {
 		user.Phone = phone
 		user.Password = password
-		CreateUser(c)
+		err := model.CreateUser(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{})
+		} else {
+			c.JSON(http.StatusOK, gin.H{})
+		}
 	}
 }

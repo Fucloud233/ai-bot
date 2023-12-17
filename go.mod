@@ -1,4 +1,4 @@
-module example.com/m/v2
+module ai-bot
 
 go 1.13
 

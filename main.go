@@ -1,8 +1,8 @@
 package main
 
 import (
-	"example.com/m/v2/router"
-	"example.com/m/v2/utils"
+	"ai-bot/router"
+	"ai-bot/utils"
 )
 
 func main() {
