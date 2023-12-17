@@ -28,7 +28,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	if user.CheckExist() {
+	if model.CheckUserExist(user.Phone) {
 		c.JSON(http.StatusBadRequest, "user has existed")
 		return
 	}
