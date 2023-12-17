@@ -3,17 +3,23 @@ package model
 import "time"
 
 type Message struct {
-	Phone string `json: "phone" binding: "-"`
-	Role string `json: "role"`
-	BotRole string `json: "bot_role" binding: "-"`
-	Time time.Time `json: "time"`
-	Content string `json: "content"`
+	Phone string `json:"-" `
+	Role string `json:"role"`
+	BotRole string `json:"-"`
+	Time time.Time `json:"time"`
+	Content string `json:"content"`
 }
 
 func AddMessages(messages *[]Message) error {
 	return DB.Create(&messages).Error
 }
 
-func (message *Message) GetNewestMessage(n int) {
-	DB.Order("time").Offset(n).Where("phone = ?", message.Phone).Find(&message)
+func GetNewestMessage(phone string, n int) ([]Message, error) {
+	var message []Message
+	err := DB.Order("time desc").Limit(n).Where("phone = ?", phone).Find(&message).Error
+	// reserve array
+	for i, j := 0, len(message)-1; i < j; i, j = i+1, j-1 {
+		message[i], message[j] = message[j], message[i]
+	}
+	return message, err
 } 

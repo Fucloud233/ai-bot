@@ -14,6 +14,8 @@ func Router() *gin.Engine {
 
 
 	r.POST("messages", service.PostMessages)
+	// https://www.flysnow.org/2019/12/13/golang-gin-parameters-in-path
+	r.GET("messages", service.GetNewestMessage)
 
 	return r
 }
