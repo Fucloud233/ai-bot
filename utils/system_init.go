@@ -3,13 +3,8 @@ package utils
 import (
 	"ai-bot/model"
 	"fmt"
+
 	"github.com/spf13/viper"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"log"
-	"os"
-	"time"
 )
 
 func InitConfig() {

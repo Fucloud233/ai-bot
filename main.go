@@ -7,7 +7,7 @@ import (
 
 func main() {
 	utils.InitConfig()
-	utils.InitMySQL()
+	model.InitMySQL()
 	r := router.Router()
 
 	r.Run(":6062")

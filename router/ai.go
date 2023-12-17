@@ -6,7 +6,16 @@ import (
 )
 
 func Router() *gin.Engine {
+	gin.SetMode(gin.DebugMode)
+
 	r := gin.Default()
 	r.GET("index/login", service.Login)
+	r.POST("user", service.CreateUser)
+
+
+	r.POST("messages", service.PostMessages)
+	// https://www.flysnow.org/2019/12/13/golang-gin-parameters-in-path
+	r.GET("messages", service.GetNewestMessage)
+
 	return r
 }

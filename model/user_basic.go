@@ -10,7 +10,7 @@ type UserBasic struct {
 	Password string
 }
 
-var DB *gorm.DB
+// var DB *gorm.DB
 
 func (table *UserBasic) TableName() string {
 	return "user_basic"
@@ -29,4 +29,13 @@ func FindUserByPhone(phone string) UserBasic {
 	user := UserBasic{}
 	DB.Where("phone = ?", phone).First(&user)
 	return user
+}
+
+func CheckUserExist(phone string) bool {
+	var user UserBasic
+	user.Phone = phone
+
+	var num int64 = 0
+	DB.Model(&user).Count(&num)
+	return num > 0
 }
