@@ -34,21 +34,21 @@
             <div style="display: flex; flex-direction: column; padding: 0; width: 100%">
                 <!-- Messages Area-->
                 <el-main id="message-container" style="overflow: auto">
-                    <el-scrollbar @scroll="handleScroll" :always="true" ref="scrollbar" style="padding-right: 20px">
-                        <!-- it must use ul and li for v-infinite-scroll -->
-                        <!-- <ul v-infinite-scroll="loadNewMessages" :infinite-scroll-disabled="isLoadingNewMessages" style="padding: 0; display: flex; flex-direction: column-reverse"> -->
-                        <li v-for="[i, item] of messageList[curRole.name].entries()" :key="i" id="message-list">
-                            <div class="profile">
-                                <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
+                    <InfiniteLoading @infinite="handleScroll" :top="true" target="#message-container">
+                        <template #spinner> <span style="display: flex; justify-content: center; padding: 5px; color: gray"> loading</span> </template>
+                        <template #complete> </template>
+                    </InfiniteLoading>
+                    <div v-for="[i, item] of messageList[curRole.name].entries()" :key="i" id="message-list">
+                        <div class="profile">
+                            <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
+                        </div>
+                        <div class="message" :id="item.role">
+                            <div v-loading="checkNeedLoading(i)" style="min-width: 30px" element-loading-background="#f1f1f1">
+                                <span>{{ item.content }}</span>
                             </div>
-                            <div class="message" :id="item.role">
-                                <div v-loading="checkNeedLoading(i)" style="min-width: 30px" element-loading-background="#f1f1f1">
-                                    <span>{{ item.content }}</span>
-                                </div>
-                            </div>
-                        </li>
-                        <!-- </ul> -->
-                    </el-scrollbar>
+                        </div>
+                    </div>
+                    <!-- </ul> -->
                 </el-main>
                 <!-- Talk  Area -->
                 <el-footer id="talk-container">
@@ -78,6 +78,8 @@ import { Right, ChatDotRound, Setting } from '@element-plus/icons-vue'
 import { chatWithRole } from '../api/api'
 import { getNewestMessages } from '../api/db'
 import { ref } from 'vue'
+import InfiniteLoading from 'v3-infinite-loading'
+import 'v3-infinite-loading/lib/style.css'
 
 // https://github.com/element-plus/element-plus/pull/12484
 
@@ -86,7 +88,8 @@ export default {
     components: {
         Right,
         ChatDotRound,
-        Setting
+        Setting,
+        InfiniteLoading
     },
     data() {
         return {
@@ -98,7 +101,7 @@ export default {
             curRoleProfileUrl: null,
             isSelecting: false,
             isReceiving: false,
-            isLoadingNewMessages: false,
+            isCompeted: false,
 
             // dialog
             isChangingRole: false,
@@ -143,17 +146,6 @@ export default {
     },
     async mounted() {
         this.changeRole(this.initRoleId)
-        // this.getNewestMessages
-        await this.pushHistoryMsg()
-        // set a very big number to scroll to the bottom
-        this.$refs.scrollbar.setScrollTop(999999999)
-
-        for (let i = 0; i < 20; i++) {
-            this.messageList[this.curRole.name].push({
-                role: 'user',
-                content: i
-            })
-        }
     },
     methods: {
         // handle function
@@ -190,13 +182,15 @@ export default {
             this.isChangingRole = true
             this.roleToChange = index
         },
-        async handleScroll({ scrollTop }) {
-            if (scrollTop != 0) {
-                return
+        async handleScroll($state) {
+            if (this.isCompeted) {
+                $state.complete()
+            } else if (await this.pushHistoryMsg()) {
+                this.isCompeted = true
+                $state.complete()
+            } else {
+                $state.loaded()
             }
-
-            await this.pushHistoryMsg()
-            this.$refs.scrollbar.setScrollTop(1)
         },
         pushUserMessage(message) {
             this.pushMessage('user', message)
@@ -213,25 +207,15 @@ export default {
         async pushHistoryMsg() {
             const curRoleName = this.curRole.name
             const result = await getNewestMessages('12345678910', this.messageList[curRoleName].length)
-            console.log(result)
-            // update the messageList
 
-            // this.messageList[curRoleName] = this.messageList[curRoleName].concat(result.data)
-
-            // this.messageList[curRoleName] = result.data.concat(this.messageList[curRoleName])
+            if (result.data.length == 0) {
+                return true
+            }
+            this.messageList[curRoleName] = result.data.concat(this.messageList[curRoleName])
+            return false
         },
         modifyLastMessage(message) {
             this.messageList[this.messageList.length - 1].content = message
-        },
-        async loadNewMessages() {
-            console.log('hello')
-            // this.isLoadingNewMessages = true
-            // const curRoleName = this.curRole.name
-            // // get newest message from database
-            // const result = await getNewestMessages('12345678910', this.messageList[curRoleName].length)
-            // // update the messageList
-            // this.messageList[curRoleName] = this.messageList[curRoleName].concat(result.data)
-            // this.isLoadingNewMessages = false
         },
         changeRole(index) {
             this.curRoleId = index
@@ -292,7 +276,7 @@ export default {
 #message-container {
     display: flex;
     flex-direction: column;
-    padding: 0 0 10px 20px;
+    padding: 0 20px 10px 20px;
     max-height: 90%;
     width: 100%;
 }
