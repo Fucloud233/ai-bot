@@ -5,7 +5,7 @@
             <el-button type="primary" @click="this.isSelecting = !this.isSelecting" style="margin-left: 10px" circle>
                 <el-icon><ChatDotRound /> </el-icon>
             </el-button>
-            <h1 id="title">{{ curRoleLabel }}</h1>
+            <h1 id="title">{{ curRole.label }}</h1>
 
             <el-button type="primary" style="margin-right: 10px" circle>
                 <el-icon><Setting /> </el-icon>
@@ -33,19 +33,21 @@
             <!-- talk content -->
             <div style="display: flex; flex-direction: column; padding: 0; width: 100%">
                 <!-- Messages Area-->
-                <el-main id="message-container">
-                    <div v-for="[i, item] of messageList.entries()" :key="i" id="message-list">
-                        <div class="profile">
-                            <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
-                        </div>
-                        <div class="message" :id="item.role">
-                            <div v-loading="checkNeedLoading(i)" style="min-width: 30px" element-loading-background="#f1f1f1">
-                                <span>{{ item.content }}</span>
+                <el-main id="message-container" style="overflow: auto">
+                    <!-- it must use ul and li for v-infinite-scroll -->
+                    <ul v-infinite-scroll="loadNewMessages" :infinite-scroll-disabled="isLoadingNewMessages" style="padding: 0; display: flex; flex-direction: column-reverse">
+                        <li v-for="[i, item] of messageList[curRole.name].entries()" :key="i" id="message-list">
+                            <div class="profile">
+                                <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
                             </div>
-                        </div>
-                    </div>
+                            <div class="message" :id="item.role">
+                                <div v-loading="checkNeedLoading(i)" style="min-width: 30px" element-loading-background="#f1f1f1">
+                                    <span>{{ item.content }}</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
                 </el-main>
-
                 <!-- Talk  Area -->
                 <el-footer id="talk-container">
                     <div id="talk-input">
@@ -71,7 +73,11 @@
 
 <script>
 import { Right, ChatDotRound, Setting } from '@element-plus/icons-vue'
-import { chatWithRole } from '@/api'
+import { chatWithRole } from '@/api/api'
+import { getNewestMessages } from '@/api/db'
+import { ref } from 'vue'
+
+// https://github.com/element-plus/element-plus/pull/12484
 
 export default {
     name: 'TalkRoom',
@@ -83,48 +89,54 @@ export default {
     data() {
         return {
             //init
-            initRoleId: 1,
+            initRoleId: 0,
             //status
             curRoleId: -1,
-            curRoleLabel: '',
+            curRole: { name: 'null' },
             curRoleProfileUrl: null,
             isSelecting: false,
             isReceiving: false,
-            roleList: [
-                {
-                    label: '父母',
-                    name: 'parent'
-                },
-                {
-                    label: '闺蜜',
-                    name: 'bestie'
-                },
-                {
-                    label: '朋友',
-                    name: 'friend'
-                },
-                {
-                    label: '心理医生',
-                    name: 'doctor'
-                }
-            ],
+            isLoadingNewMessages: false,
 
             // dialog
             isChangingRole: false,
             roleToChange: -1,
 
             // talking
-            input: '',
-            messageList: [
-                // {
-                //     role: 'user',
-                //     content: '你好'
-                // },
-                // {
-                //     role: 'assistant',
-                //     content: ''
-                // }
-            ]
+            input: ''
+        }
+    },
+    setup() {
+        // role
+        const roleList = ref([
+            {
+                label: '父母',
+                name: 'parent'
+            },
+            {
+                label: '闺蜜',
+                name: 'bestie'
+            },
+            {
+                label: '朋友',
+                name: 'friend'
+            },
+            {
+                label: '心理医生',
+                name: 'doctor'
+            }
+        ])
+        var messageList = ref({})
+        for (let role of roleList.value) {
+            messageList.value[role.name] = []
+        }
+
+        // append a empty array for render
+        messageList.value['null'] = []
+
+        return {
+            roleList,
+            messageList
         }
     },
     mounted() {
@@ -179,10 +191,19 @@ export default {
         modifyLastMessage(message) {
             this.messageList[this.messageList.length - 1].content = message
         },
+        async loadNewMessages() {
+            this.isLoadingNewMessages = true
+            const curRoleName = this.curRole.name
+            // get newest message from database
+            const result = await getNewestMessages('12345678910', this.messageList[curRoleName].length)
+            // update the messageList
+            this.messageList[curRoleName] = this.messageList[curRoleName].concat(result.data)
+            this.isLoadingNewMessages = false
+        },
         changeRole(index) {
             this.curRoleId = index
-            this.curRoleLabel = this.roleList[index]['label']
-            this.curRoleProfileUrl = this.getProfileUrl(this.roleList[index]['name'])
+            this.curRole = this.roleList[index]
+            this.curRoleProfileUrl = this.getProfileUrl(this.curRole.name)
 
             // change the status of those component
             this.isChangingRole = false
