@@ -40,8 +40,8 @@ export async function getNewestMessages(phone, size) {
                 data: resp.data['messages']
             }
         })
-        .catch(() => {
-            return {}
+        .catch((err) => {
+            return []
         })
 }
 
