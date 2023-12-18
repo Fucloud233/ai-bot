@@ -70,3 +70,27 @@ func Login(c *gin.Context) {
 		}
 	}
 }
+
+
+func UserLogin(c *gin.Context) {
+	var user model.UserBasic
+	err := c.ShouldBindJSON(&user)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, error.GetErrorMessage(error.JSONParseError))
+		return
+	}
+
+	findUser := model.FindUserByPhone(user.Phone)
+	if findUser.Phone == "" {
+		c.JSON(http.StatusNotFound, "")
+	} else if user.Password != findUser.Password {
+		c.JSON(http.StatusForbidden, "")
+	} else {
+		findUser.Password = ""
+
+		c.JSON(http.StatusOK, gin.H{
+			"info": findUser,
+		})
+	}
+}

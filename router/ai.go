@@ -11,6 +11,7 @@ func Router() *gin.Engine {
 
 	r := gin.Default()
 	r.POST("index/login", service.Login)
+	r.POST("login", service.UserLogin)
 	r.POST("register", service.CreateUser)
 
 	r.POST("messages", service.PostMessages)

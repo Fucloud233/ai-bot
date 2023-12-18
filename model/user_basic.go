@@ -7,7 +7,7 @@ import (
 type UserBasic struct {
 	gorm.Model
 	Phone    string
-	Password string
+	Password string `json:"password,omitempty"`
 }
 
 // var DB *gorm.DB
@@ -34,7 +34,6 @@ func FindUserByPhone(phone string) UserBasic {
 func CheckUserExist(phone string) bool {
 	var user UserBasic
 
-	var num int64 = 0
-	DB.Model(&user).Where("phone = ?", phone).Count(&num)
-	return num > 0
+	DB.Where("phone = ?", user.Phone).First(&user)
+	return user.Phone != ""
 }
