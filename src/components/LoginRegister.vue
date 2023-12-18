@@ -6,7 +6,7 @@
                 <h2 class="title">Ai解压小助手</h2>
                 <el-form ref="loginForm" :model="loginInfo" :rules="rules" label-width="80px" label-position="left" class="form">
                     <el-form-item label="电话" prop="phone"> <el-input v-model="loginInfo.phone" /></el-form-item>
-                    <el-form-item label="密码" prop="password"> <el-input v-model="loginInfo.password" /></el-form-item>
+                    <el-form-item label="密码" prop="password"> <el-input show-password v-model="loginInfo.password" /></el-form-item>
                 </el-form>
                 <div>
                     <el-button type="primary" @click="login">确定</el-button>
@@ -41,7 +41,7 @@
 
 <script>
 import { ElMessage } from 'element-plus'
-import { register } from '../api/db'
+import { register, login } from '../api/db'
 
 export default {
     name: 'Login',
@@ -62,8 +62,8 @@ export default {
             isLogin: true,
 
             loginInfo: {
-                phone: '',
-                password: ''
+                phone: '18212345678',
+                password: '1234567'
             },
             registerInfo: {
                 phone: '18212345678',
@@ -110,15 +110,19 @@ export default {
     },
     methods: {
         login() {
-            this.$refs.loginForm.validate((valid) => {
+            this.$refs.loginForm.validate(async (valid) => {
                 if (!valid) {
                     return
                 }
-                // TODO: check phone and password
-                this.loginInfo = {}
+                // check phone and password
+                const result = await login(this.loginInfo)
+                if (!result.flag) {
+                    ElMessage.error(result.data)
+                    return
+                }
 
+                this.loginInfo = {}
                 this.$store.commit('login')
-                console.log(this.$store.state.hasLogged)
                 this.$router.push('/talk')
             })
         },
