@@ -34,6 +34,6 @@ func FindUserByPhone(phone string) UserBasic {
 func CheckUserExist(phone string) bool {
 	var user UserBasic
 
-	DB.Where("phone = ?", user.Phone).First(&user)
+	DB.Where("phone = ?", phone).First(&user)
 	return user.Phone != ""
 }
