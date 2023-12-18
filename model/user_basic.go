@@ -33,9 +33,8 @@ func FindUserByPhone(phone string) UserBasic {
 
 func CheckUserExist(phone string) bool {
 	var user UserBasic
-	user.Phone = phone
 
 	var num int64 = 0
-	DB.Model(&user).Count(&num)
+	DB.Model(&user).Where("phone = ?", phone).Count(&num)
 	return num > 0
 }

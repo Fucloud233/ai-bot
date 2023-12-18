@@ -2,8 +2,10 @@ package service
 
 import (
 	"ai-bot/model"
-	"github.com/gin-gonic/gin"
+	"ai-bot/utils/error"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // func CreateUser(c *gin.Context) {
@@ -23,12 +25,12 @@ func CreateUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&user)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{})
+		c.JSON(http.StatusBadRequest, error.GetErrorMessage(error.JSONParseError))
 		return
 	}
 
 	if model.CheckUserExist(user.Phone) {
-		c.JSON(http.StatusBadRequest, "user has existed")
+		c.JSON(http.StatusBadRequest, error.GetErrorMessage(error.UserExist))
 		return
 	}
 
