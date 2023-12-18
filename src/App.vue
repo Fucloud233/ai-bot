@@ -1,15 +1,12 @@
 <template>
-    <TalkRoom />
+    <router-view></router-view>
 </template>
 
 <script>
-import TalkRoom from './components/TalkRoom.vue'
-
 export default {
     name: 'App',
-    components: {
-        TalkRoom
-    }
+    components: {},
+    methods: {}
 }
 </script>
 
