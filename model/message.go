@@ -14,9 +14,9 @@ func AddMessages(messages *[]Message) error {
 	return DB.Create(&messages).Error
 }
 
-func GetNewestMessage(phone string, n int) ([]Message, error) {
+func GetNewestMessage(phone string, number int, size int) ([]Message, error) {
 	var message []Message
-	err := DB.Order("time desc").Limit(n).Where("phone = ?", phone).Find(&message).Error
+	err := DB.Order("time").Limit(number).Offset(size).Where("phone = ?", phone).Find(&message).Error
 	// reserve array
 	for i, j := 0, len(message)-1; i < j; i, j = i+1, j-1 {
 		message[i], message[j] = message[j], message[i]

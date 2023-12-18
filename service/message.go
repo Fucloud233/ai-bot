@@ -50,7 +50,8 @@ func PostMessages(c *gin.Context) {
 
 func GetNewestMessage(c *gin.Context) {
 	phone := c.Query("phone")
-	n, err := strconv.Atoi(c.Query("n"))
+	num, err1 := strconv.Atoi(c.Query("num"))
+	size, err2 := strconv.Atoi(c.Query("size"))
 
 	if phone == ""{
 		c.JSON(http.StatusBadRequest, error.ParamLose)
@@ -58,16 +59,17 @@ func GetNewestMessage(c *gin.Context) {
 	} else if !model.CheckUserExist(phone) {
 		c.JSON(http.StatusNotFound, error.UserNotFound)
 		return
-	} else if err != nil {
-		n = 10
+	} else if err1 != nil {
+		num = 10
+	} else if err2 != nil {
+		size = 0;
 	}
 
 	// convert message to result
 	var result struct {
 		Messages []model.Message `json:"messages" binding:"dive"`
 	}
-	var messages []model.Message
-	messages, err = model.GetNewestMessage(phone, n)
+	messages, err := model.GetNewestMessage(phone, num, size)
 	result.Messages = messages
 
 	status := http.StatusOK
