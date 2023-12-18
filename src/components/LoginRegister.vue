@@ -1,20 +1,20 @@
 <template>
     <div class="main">
-        <h1 style="color: white; margin-top: 20%">Ai解压小助手</h1>
+        <h1 style="color: #409eff; margin-top: 20%"></h1>
         <div class="container">
             <div v-if="isLogin">
-                <h2>登录</h2>
+                <h2 class="title">Ai解压小助手</h2>
                 <el-form ref="loginForm" :model="loginInfo" :rules="rules" label-width="80px" label-position="left" class="form">
                     <el-form-item label="电话" prop="phone"> <el-input v-model="loginInfo.phone" /></el-form-item>
                     <el-form-item label="密码" prop="password"> <el-input v-model="loginInfo.password" /></el-form-item>
                 </el-form>
                 <div>
                     <el-button type="primary" @click="login">确定</el-button>
-                    <el-button type="info" @click="toRegister">注册</el-button>
+                    <el-button @click="toRegister">注册</el-button>
                 </div>
             </div>
             <div v-if="!isLogin">
-                <h2>注册</h2>
+                <h2 class="title">新用户注册</h2>
                 <el-form ref="registerForm" :model="registerInfo" :rules="rules" label-width="80px" label-position="left" class="form">
                     <el-form-item label="电话" prop="phone"> <el-input v-model="registerInfo.phone" /></el-form-item>
                     <el-form-item label="性别" prop="isMale">
@@ -32,7 +32,7 @@
                 </el-form>
                 <div style="margin-top: 30px">
                     <el-button type="primary" @click="register">注册</el-button>
-                    <el-button type="info" @click="returnLogin">取消</el-button>
+                    <el-button @click="returnLogin">取消</el-button>
                 </div>
             </div>
         </div>
@@ -40,6 +40,9 @@
 </template>
 
 <script>
+import { ElMessage } from 'element-plus'
+import { register } from '../api/db'
+
 export default {
     name: 'Login',
     data() {
@@ -124,8 +127,15 @@ export default {
             this.isLogin = false
         },
         register() {
-            this.$refs.registerForm.validate((valid) => {
+            this.$refs.registerForm.validate(async (valid) => {
                 if (!valid) {
+                    return
+                }
+
+                // check register
+                let result = await register(this.registerInfo)
+                if (!result.flag) {
+                    ElMessage.error(result.data)
                     return
                 }
 
@@ -148,7 +158,7 @@ export default {
     align-items: center;
     flex-direction: column;
 
-    background-color: #409eff;
+    background-color: #f1f2f5;
     height: 100%;
 }
 .container {
@@ -159,12 +169,15 @@ export default {
     text-align: center;
 
     max-width: 300px;
-    border-radius: 10px;
+    border-radius: 5px;
     padding: 10px 15px 30px 15px;
     background-color: white;
 }
 .form {
     margin: 0 20px 0 20px;
+}
+.title {
+    color: #409eff;
 }
 .el-input {
     width: 200px;
