@@ -1,9 +1,9 @@
 package main
 
 import (
-	"example.com/m/v2/model"
-	"example.com/m/v2/router"
-	"example.com/m/v2/utils"
+	"ai-bot/model"
+	"ai-bot/router"
+	"ai-bot/utils"
 )
 
 func main() {

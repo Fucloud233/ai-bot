@@ -1,10 +1,9 @@
 package service
 
 import (
-	"net/http"
-
-	"example.com/m/v2/model"
+	"ai-bot/model"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 // func CreateUser(c *gin.Context) {
@@ -35,7 +34,7 @@ func CreateUser(c *gin.Context) {
 
 	err1 := model.CreateUser(&user)
 	err2 := model.InitRoles(user.Phone)
-	
+
 	status := http.StatusOK
 	if err1 != nil && err2 != nil {
 		status = http.StatusInternalServerError
@@ -46,8 +45,8 @@ func CreateUser(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	user := model.UserBasic{}
-	phone := c.Query("phone")
-	password := c.Query("phone")
+	phone := c.PostForm("phone")
+	password := c.PostForm("phone")
 	findUser := model.FindUserByPhone(phone)
 	if findUser.Phone != "" {
 		if password == findUser.Password {
@@ -61,6 +60,11 @@ func Login(c *gin.Context) {
 	} else {
 		user.Phone = phone
 		user.Password = password
-		CreateUser(c)
+		err := model.CreateUser(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{})
+		} else {
+			c.JSON(http.StatusOK, gin.H{})
+		}
 	}
 }
