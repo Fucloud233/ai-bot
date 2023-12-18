@@ -1,12 +1,11 @@
 package service
 
 import (
+	"ai-bot/model"
+	"ai-bot/utils/error"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-
-	"example.com/m/v2/model"
-	"example.com/m/v2/utils/error"
-	"github.com/gin-gonic/gin"
 )
 
 func PostMessages(c *gin.Context) {
@@ -14,8 +13,8 @@ func PostMessages(c *gin.Context) {
 	var content struct {
 		// Attribute -> database: under_score_case
 		// -> json: camelCased
-		BotRole string 
-		Phone string 
+		BotRole  string
+		Phone    string
 		Messages []model.Message `binding:"dive"`
 	}
 
@@ -40,19 +39,18 @@ func PostMessages(c *gin.Context) {
 	}
 
 	status := http.StatusOK
-	if model.AddMessages(&messages) != nil{
+	if model.AddMessages(&messages) != nil {
 		status = http.StatusInternalServerError
 	}
 
 	c.JSON(status, "")
 }
 
-
 func GetNewestMessage(c *gin.Context) {
 	phone := c.Query("phone")
 	n, err := strconv.Atoi(c.Query("n"))
 
-	if phone == ""{
+	if phone == "" {
 		c.JSON(http.StatusBadRequest, error.ParamLose)
 		return
 	} else if !model.CheckUserExist(phone) {

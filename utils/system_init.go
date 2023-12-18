@@ -1,14 +1,12 @@
 package utils
 
 import (
-	"ai-bot/model"
 	"fmt"
-
 	"github.com/spf13/viper"
 )
 
 func InitConfig() {
-	viper.SetConfigName("ai")
+	viper.SetConfigName("aibot")
 	viper.AddConfigPath("config")
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -17,17 +15,17 @@ func InitConfig() {
 	fmt.Println("aibot config inited.")
 }
 
-func InitMySQL() {
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{
-			SlowThreshold: time.Second,
-			LogLevel:      logger.Info,
-			Colorful:      true,
-		},
-	)
-	fmt.Println("连接数据库", viper.GetString("mysql.dns"))
-	model.DB, _ = gorm.Open(mysql.Open(viper.GetString("mysql.dns")),
-		&gorm.Config{Logger: newLogger})
-	fmt.Println("MySQL inited.", viper.GetString("mysql"))
-}
+//func InitMySQL() {
+//	newLogger := logger.New(
+//		log.New(os.Stdout, "\r\n", log.LstdFlags),
+//		logger.Config{
+//			SlowThreshold: time.Second,
+//			LogLevel:      logger.Info,
+//			Colorful:      true,
+//		},
+//	)
+//	fmt.Println("连接数据库", viper.GetString("mysql.dns"))
+//	model.DB, _ = gorm.Open(mysql.Open(viper.GetString("mysql.dns")),
+//		&gorm.Config{Logger: newLogger})
+//	fmt.Println("MySQL inited.", viper.GetString("mysql"))
+//}

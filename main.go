@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ai-bot/model"
 	"ai-bot/router"
 	"ai-bot/utils"
 )
