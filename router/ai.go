@@ -15,6 +15,7 @@ func Router() *gin.Engine {
 	r.POST("register", service.CreateUser)
 
 	r.POST("messages", service.PostMessages)
+	r.POST("message", service.PostMessage)
 	// https://www.flysnow.org/2019/12/13/golang-gin-parameters-in-path
 	r.GET("messages", service.GetNewestMessage)
 

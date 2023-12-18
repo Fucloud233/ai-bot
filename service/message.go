@@ -1,6 +1,7 @@
 package service
 
 import (
+	"ai-bot/llm"
 	"ai-bot/model"
 	"ai-bot/utils/error"
 	"net/http"
@@ -47,6 +48,34 @@ func PostMessages(c *gin.Context) {
 	c.JSON(status, "")
 }
 
+func PostMessage(c *gin.Context) {
+	var content struct{
+		// Messages []llm.Message `binding:"dive"`
+		Message llm.Message
+		BotRole string
+	}
+	
+	err := c.ShouldBindJSON(&content)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, error.GetErrorMessage(error.JSONParseError))
+	}
+
+	answer := llm.ChatWithRole(content.Message, content.BotRole)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": answer,
+	})
+	// 搜索向量数据库
+
+	// 获取指定描述的Prompt
+
+	// 合成prompt
+
+	// 添加的到数据库
+
+	// 返回结果
+}
+
 func GetNewestMessage(c *gin.Context) {
 	phone := c.Query("phone")
 	num, err1 := strconv.Atoi(c.Query("num"))
@@ -77,3 +106,5 @@ func GetNewestMessage(c *gin.Context) {
 	}
 	c.IndentedJSON(status, result)
 }
+
+
