@@ -16,7 +16,7 @@
             <!-- select the role of bot-->
             <el-aside v-show="this.isSelecting" style="max-width: fit-content">
                 <!-- @select call-back function, index: value -->
-                <el-menu @select="handleCheckChangeRole" :default-active="String(this.curRoleId)" style="padding: 15px 0 0 15px; height: 100%">
+                <el-menu @select="changeRole" :default-active="String(this.curRoleId)" style="padding: 15px 0 0 15px; height: 100%">
                     <h2 style="margin-bottom: 15px; font-size: large">切换角色</h2>
                     <el-menu-item v-for="[i, role] of roleList.entries()" :key="i" :index="String(i)" style="padding: 0; margin-right: 15px">
                         <template #title>
@@ -36,9 +36,9 @@
                 <el-main id="message-container" style="overflow: auto">
                     <InfiniteLoading @infinite="handleScroll" :top="true" target="#message-container">
                         <template #spinner> <span style="display: flex; justify-content: center; padding: 5px; color: gray"> loading</span> </template>
-                        <template #complete> </template>
+                        <template #complete><div></div> </template>
                     </InfiniteLoading>
-                    <div v-for="[i, item] of messageList[curRole.name].entries()" :key="i" id="message-list">
+                    <div v-for="[i, item] of curMessageList.entries()" :key="i" id="message-list">
                         <div class="profile">
                             <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
                         </div>
@@ -62,15 +62,6 @@
             </div>
         </div>
     </el-container>
-
-    <!-- dialog -->
-    <el-dialog title="提示" v-model="isChangingRole" style="min-width: 300px">
-        <a>更换角色后，之前的聊天记录会被清除，你确定要更换吗？</a>
-        <template #footer>
-            <el-button @click="isChangingRole = false">取消</el-button>
-            <el-button type="primary" @click="changeRole(this.roleToChange)"> 确定 </el-button>
-        </template>
-    </el-dialog>
 </template>
 
 <script>
@@ -95,18 +86,14 @@ export default {
         return {
             //init
             initRoleId: 0,
-            //status
             curRoleId: -1,
             curRole: { name: 'null' },
             curRoleProfileUrl: null,
+            curMessageList: [],
+            //status
             isSelecting: false,
             isReceiving: false,
             isCompeted: false,
-
-            // dialog
-            isChangingRole: false,
-            roleToChange: -1,
-
             // talking
             input: ''
         }
@@ -164,23 +151,16 @@ export default {
 
             // receive message
             const roleName = this.roleList[this.curRoleId].name
-            const result = await chatWithRole(this.messageList.slice(0, -1), roleName)
+            const result = await chatWithRole(this.curMessageList.slice(0, -1), roleName)
             if (!result.flag) {
                 // this.pushAssistantMessage(result.data)
                 this.modifyLastMessage('不好意思，我有点事情，稍后再回复你。')
+                this.isReceiving = false
                 return
             }
             // update the message
             this.modifyLastMessage(result.data)
             this.isReceiving = false
-        },
-        handleCheckChangeRole(index) {
-            if (this.curRoleId == index) {
-                return
-            }
-
-            this.isChangingRole = true
-            this.roleToChange = index
         },
         async handleScroll($state) {
             if (this.isCompeted) {
@@ -199,42 +179,45 @@ export default {
             this.pushMessage('assistant', message)
         },
         pushMessage(role, message) {
-            this.messageList.push({
+            this.curMessageList.push({
                 role: role,
                 content: message
             })
         },
         async pushHistoryMsg() {
+            const curUserPhone = this.$store.state.userInfo.phone
             const curRoleName = this.curRole.name
-            const result = await getNewestMessages('12345678910', this.messageList[curRoleName].length)
+            const result = await getNewestMessages(curUserPhone, this.curMessageList.length)
 
             if (result.data.length == 0) {
                 return true
             }
-            this.messageList[curRoleName] = result.data.concat(this.messageList[curRoleName])
+            this.curMessageList = result.data.concat(this.curMessageList)
             return false
         },
         modifyLastMessage(message) {
-            this.messageList[this.messageList.length - 1].content = message
+            const curRoleName = this.curRole.name
+            this.curMessageList[this.curMessageList.length - 1].content = message
         },
         changeRole(index) {
             this.curRoleId = index
             this.curRole = this.roleList[index]
             this.curRoleProfileUrl = this.getProfileUrl(this.curRole.name)
+            this.curMessageList = this.messageList[this.curRole.name]
 
-            // change the status of those component
-            this.isChangingRole = false
             this.isSelecting = false
         },
         getProfileUrl(name) {
             try {
                 // return require(`../assets/profile/${name}.png`)
+                return `/src/assets/profile/${name}.png`
             } catch (error) {
                 // return require('../assets/profile/bot.jpg')
+                return '/src/assets/profile/bot.jpg'
             }
         },
         checkNeedLoading(index) {
-            return this.isReceiving && index === this.messageList.length - 1
+            return this.isReceiving && index === this.curMessageList.length - 1
         }
     }
 }
