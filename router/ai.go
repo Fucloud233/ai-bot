@@ -19,5 +19,8 @@ func Router() *gin.Engine {
 	// https://www.flysnow.org/2019/12/13/golang-gin-parameters-in-path
 	r.GET("messages", service.GetNewestMessage)
 
+	r.PUT("role/prompt", service.UpdateRolePrompt)
+	r.GET("role/prompt", service.GetRolePrompt)
+
 	return r
 }
