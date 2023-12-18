@@ -3,9 +3,10 @@ package service
 import (
 	"ai-bot/model"
 	"ai-bot/utils/error"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func PostMessages(c *gin.Context) {
@@ -52,10 +53,10 @@ func GetNewestMessage(c *gin.Context) {
 	size, err2 := strconv.Atoi(c.Query("size"))
 
 	if phone == "" {
-		c.JSON(http.StatusBadRequest, error.ParamLose)
+		c.JSON(http.StatusBadRequest,  error.GetErrorMessage(error.ParamLose))
 		return
 	} else if !model.CheckUserExist(phone) {
-		c.JSON(http.StatusNotFound, error.UserNotFound)
+		c.JSON(http.StatusNotFound, error.GetErrorMessage(error.UserNotFound))
 		return
 	} else if err1 != nil {
 		num = 10
