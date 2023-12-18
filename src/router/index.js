@@ -21,7 +21,6 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
     const hasLogged = store.state.hasLogged
-    console.log(hasLogged)
 
     if (!hasLogged && to.name !== 'login') {
         return { name: 'login' }
