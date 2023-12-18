@@ -112,8 +112,10 @@ export default {
                     return
                 }
                 // TODO: check phone and password
-
                 this.loginInfo = {}
+
+                this.$store.commit('login')
+                console.log(this.$store.state.hasLogged)
                 this.$router.push('/talk')
             })
         },
