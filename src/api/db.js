@@ -1,26 +1,6 @@
 import axios from 'axios'
 
-function getApiUrl(name) {
-    return '/db/api/' + name
-}
-
-function postRequest(apiUrl, data) {
-    return axios({
-        method: 'post',
-        url: apiUrl,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        data: data
-    })
-}
-
-function wrapResult(flag, data) {
-    return {
-        flag: flag,
-        data: data
-    }
-}
+import { postRequest, wrapResult } from './utils'
 
 export async function getNewestMessages(phone, size) {
     return await axios({
@@ -40,7 +20,7 @@ export async function getNewestMessages(phone, size) {
                 data: resp.data['messages']
             }
         })
-        .catch((err) => {
+        .catch(() => {
             return []
         })
 }
