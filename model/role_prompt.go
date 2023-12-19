@@ -14,6 +14,16 @@ const (
     Doctor string = "doctor"
 )
 
+func GetRoleName(role string) string {
+	switch role {
+	case "parent": return "父母"
+	case "bestie": return "闺蜜"
+	case "friend": return "朋友"
+	case "doctor": return "心理医生"
+	default: return "解压小助手"
+	}
+}
+
 var ROLES = []string{
 	Parent, Bestie, Friend, Doctor,
 }
