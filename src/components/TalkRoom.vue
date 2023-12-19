@@ -68,7 +68,7 @@
 
 <script>
 import { Right, ChatDotRound, Setting } from '@element-plus/icons-vue'
-import { chatWithRole } from '../api/api'
+import { sendMessage } from '../api/llm'
 import { getNewestMessages } from '../api/db'
 import { ref } from 'vue'
 import InfiniteLoading from 'v3-infinite-loading'
@@ -149,6 +149,7 @@ export default {
             }
 
             this.pushUserMessage(this.input)
+            const messageToSend = this.input
             this.input = ''
 
             // append empty message
@@ -156,8 +157,8 @@ export default {
             this.pushAssistantMessage('')
 
             // receive message
-            const roleName = this.roleList[this.curRoleId].name
-            const result = await chatWithRole(this.curMessageList.slice(0, -1), roleName)
+            const phone = this.$store.state.userInfo.phone
+            const result = await sendMessage(phone, this.curRole.name, messageToSend)
             if (!result.flag) {
                 // this.pushAssistantMessage(result.data)
                 this.modifyLastMessage('不好意思，我有点事情，稍后再回复你。')
@@ -205,7 +206,10 @@ export default {
             this.curMessageList[this.curMessageList.length - 1].content = message
         },
         changeRole(index) {
-            this.curRoleId = index
+            // backup previous message list
+            this.messageList[this.curRole.name] = this.curMessageList
+
+            // modify current role and messageList
             this.curRole = this.roleList[index]
             this.curRoleProfileUrl = this.getProfileUrl(this.curRole.name)
             this.curMessageList = this.messageList[this.curRole.name]
