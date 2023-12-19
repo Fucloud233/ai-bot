@@ -18,6 +18,7 @@ func Router() *gin.Engine {
 	r.POST("message", service.PostMessage)
 	// https://www.flysnow.org/2019/12/13/golang-gin-parameters-in-path
 	r.GET("messages", service.GetNewestMessage)
+	r.DELETE("message/all", service.DeleteAllMessages)
 
 	r.PUT("role/prompt", service.UpdateRolePrompt)
 	r.GET("role/prompt", service.GetRolePrompt)

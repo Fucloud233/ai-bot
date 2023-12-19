@@ -8,6 +8,7 @@ const (
 )
 
 type Message struct {
+	Id int `json:"-" gorm:"primary;AUTO_INCREMENT"`
 	Phone string `json:"-" `
 	BotRole string `json:"-"`
 	Time time.Time `json:"time"`
@@ -46,10 +47,15 @@ func AddMessages(messages *[]Message) error {
 
 func GetNewestMessage(phone string, number int, size int) ([]Message, error) {
 	var message []Message
-	err := DB.Order("time").Limit(number).Offset(size).Where("phone = ?", phone).Find(&message).Error
+	err := DB.Order("id desc").Limit(number).Offset(size).Where("phone = ?", phone).Find(&message).Error
 	// reserve array
-	// for i, j := 0, len(message)-1; i < j; i, j = i+1, j-1 {
-	// 	message[i], message[j] = message[j], message[i]
-	// }
+	for i, j := 0, len(message)-1; i < j; i, j = i+1, j-1 {
+		message[i], message[j] = message[j], message[i]
+	}
 	return message, err
 } 
+
+func DeleteAllMessages(phone string, botRole string) error {
+	var message Message
+	return DB.Where("phone = ? and bot_role = ?", phone, botRole).Delete(&message).Error
+}

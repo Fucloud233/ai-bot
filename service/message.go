@@ -51,7 +51,6 @@ func PostMessages(c *gin.Context) {
 
 // the history messages in the frontend is different with backend
 // listener metrics: many messages will be merge into one message
-
 func PostMessage(c *gin.Context) {
 	var content struct{
 		Message string
@@ -148,4 +147,24 @@ func GetNewestMessage(c *gin.Context) {
 	c.IndentedJSON(status, result)
 }
 
+func DeleteAllMessages(c *gin.Context) {
+	var content struct{
+		Phone string
+		BotRole string
+	}
+
+	err := c.ShouldBindJSON(&content)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, error.GetErrorMessage(error.JSONParseError))
+		return
+	} 
+
+	err = model.DeleteAllMessages(content.Phone, content.BotRole)
+	status := http.StatusOK
+	if err != nil {
+		status = http.StatusInternalServerError
+	}
+
+	c.JSON(status, nil)
+}
 
