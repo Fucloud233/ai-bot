@@ -8,13 +8,13 @@ export default defineConfig({
     server: {
         port: 6060,
         proxy: {
-            '/db/api': {
-                target: 'http://127.0.0.1:6062/',
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/db\/api/, '')
-            },
+            // '/db/api': {
+            //     target: 'http://127.0.0.1:6062/',
+            //     changeOrigin: true,
+            //     rewrite: (path) => path.replace(/^\/db\/api/, '')
+            // },
             '/api': {
-                target: 'http://127.0.0.1:6061/',
+                target: 'http://127.0.0.1:6062/',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api/, '')
             }
