@@ -1,35 +1,25 @@
 package llm
 
 import (
+	"ai-bot/model"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
-
-type Message struct {
-	Role string `json:"role"`
-	Content string `json:"content"`
-}
-
 
 func getApiUrl(path string) string {
 	return "http://localhost:6061" + path
 }
 
-
-func ChatWithRole(message Message, role string)  string {
-	body := map[string]interface{}{
-		"messages": []Message{message},
-	}
-
+func postRequest(body map[string]interface{}) string {
 	bytesData, _ := json.Marshal(body)
 
-
 	const contentType = "application/json"
-	resp, err := http.Post(getApiUrl("/chat/"+role), contentType, bytes.NewBuffer([]byte(bytesData)));
+	resp, err := http.Post(getApiUrl("/chat"), contentType, bytes.NewBuffer([]byte(bytesData)));
 
 	if err != nil {
-		return "error"
+		return fmt.Sprint(err)
 	}
 	defer resp.Body.Close()
 
@@ -37,4 +27,44 @@ func ChatWithRole(message Message, role string)  string {
 	buf.ReadFrom(resp.Body)
 
 	return buf.String()
+}
+
+
+// the number of messages couldn't be odd
+// so we should append answer about the assistant
+func wrapBasicPrompt(basicPrompt string, answer string) []model.SimpleMessage {
+	messages := []model.SimpleMessage {
+		model.NewSimpleMessage(model.User, basicPrompt),
+		model.NewSimpleMessage(model.Assistant, answer),
+	}
+
+	return messages
+}
+
+func ChatWithRole(role string, roleDescription string, historyMessages []model.Message, userMessage string)  string {
+	// 1. merge the basic prompt and role 
+	basic_prompt := 	
+		// (1) basic role prompt
+		fmt.Sprintf("你现在是我的%s。", model.GetRoleName(role)) +
+		// (2) description about role from user
+		roleDescription +
+		// (3) some prompt about this project
+		"我现在学习、工作或者生活上有点压力，请你帮我缓解一下我和压力和焦虑。"+
+        "请控制你的回答在20个字之间。"
+
+	messages := wrapBasicPrompt(basic_prompt, "好的，我一定会控制回答字数的")
+
+	// push the historyMessage into messageList
+	for _, message := range historyMessages {
+		messages = append(messages, message.ToSimpleMessage())
+	}
+
+	// append user message 
+	messages = append(messages, model.NewSimpleMessage(model.User, userMessage))
+
+	body := map[string]interface{}{
+		"messages": messages,
+	}
+
+	return postRequest(body)
 }
