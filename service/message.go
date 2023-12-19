@@ -6,6 +6,7 @@ import (
 	"ai-bot/utils/error"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -48,32 +49,72 @@ func PostMessages(c *gin.Context) {
 	c.JSON(status, "")
 }
 
+// the history messages in the frontend is different with backend
+// listener metrics: many messages will be merge into one message
+
 func PostMessage(c *gin.Context) {
 	var content struct{
-		// Messages []llm.Message `binding:"dive"`
-		Message llm.Message
+		Message string
 		BotRole string
+		Phone string
 	}
-	
+
+	sendTime := time.Now()
 	err := c.ShouldBindJSON(&content)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, error.GetErrorMessage(error.JSONParseError))
+	} else if !model.CheckUserExist(content.Phone) {
+		c.JSON(http.StatusNotFound, error.GetErrorMessage(error.UserNotFound))
+		return
+	}
+	
+	// 1. get the description prompt
+	rolePrompt, err := model.GetRolePrompt(content.Phone, content.BotRole)
+	if err != nil {
+		rolePrompt = ""
 	}
 
-	answer := llm.ChatWithRole(content.Message, content.BotRole)
+	// 2. search history from newest database
+	historyMessages, err := model.GetNewestMessage(content.Phone, 10, 0);
+	if err != nil {
+		historyMessages = []model.Message{}
+	} else if len(historyMessages) >= 2 {
+		begin := 0
+		end := len(historyMessages)
+		if historyMessages[0].Role != model.User {
+			begin += 1
+		} 
+		if historyMessages[len(historyMessages)-1].Role != model.Assistant {
+			end -= 1
+		}
+		if begin > end {
+			historyMessages = []model.Message{}
+		} else {
+			historyMessages = historyMessages[begin:end]
+		}
+	}
+
+	// 3. TODO: search history from vector database
+	// relatedHistoryMessages, err := 
+
+	// 4. call LLM
+	answer := llm.ChatWithRole(content.BotRole, rolePrompt, historyMessages, content.Message)
+	answerTime := time.Now()
+	
+	// 5. save to database
+	messagesToSave := []model.Message{
+		model.NewMessage(content.Phone, content.BotRole, model.User, content.Message, sendTime),
+		model.NewMessage(content.Phone, content.BotRole, model.Assistant, answer, answerTime),
+	}
+	err = model.AddMessages(&messagesToSave)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return;
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": answer,
 	})
-	// 搜索向量数据库
-
-	// 获取指定描述的Prompt
-
-	// 合成prompt
-
-	// 添加的到数据库
-
-	// 返回结果
 }
 
 func GetNewestMessage(c *gin.Context) {
