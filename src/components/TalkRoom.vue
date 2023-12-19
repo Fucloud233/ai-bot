@@ -7,7 +7,7 @@
             </el-button>
             <h1 id="title">{{ curRole.label }}</h1>
 
-            <el-button type="primary" style="margin-right: 10px" circle>
+            <el-button type="primary" @click="this.showRolePromptDialog = true" style="margin-right: 10px" circle>
                 <el-icon><Setting /> </el-icon>
             </el-button>
         </el-header>
@@ -62,6 +62,8 @@
             </div>
         </div>
     </el-container>
+
+    <RolePromptDialog title="自定义角色描述" v-if="showRolePromptDialog" :closed="() => (showRolePromptDialog = false)" :bot-role="curRole.name"></RolePromptDialog>
 </template>
 
 <script>
@@ -72,6 +74,8 @@ import { ref } from 'vue'
 import InfiniteLoading from 'v3-infinite-loading'
 import 'v3-infinite-loading/lib/style.css'
 
+import RolePromptDialog from './RolePromptDialog.vue'
+
 // https://github.com/element-plus/element-plus/pull/12484
 
 export default {
@@ -80,20 +84,22 @@ export default {
         Right,
         ChatDotRound,
         Setting,
-        InfiniteLoading
+        InfiniteLoading,
+        RolePromptDialog
     },
     data() {
         return {
             //init
             initRoleId: 0,
             curRoleId: -1,
-            curRole: { name: 'null' },
+            curRole: { name: 'parent' },
             curRoleProfileUrl: null,
             curMessageList: [],
             //status
             isSelecting: false,
             isReceiving: false,
             isCompeted: false,
+            showRolePromptDialog: false,
             // talking
             input: ''
         }
@@ -186,7 +192,6 @@ export default {
         },
         async pushHistoryMsg() {
             const curUserPhone = this.$store.state.userInfo.phone
-            const curRoleName = this.curRole.name
             const result = await getNewestMessages(curUserPhone, this.curMessageList.length)
 
             if (result.data.length == 0) {
