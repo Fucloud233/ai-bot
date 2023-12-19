@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { postRequest, wrapResult } from './utils'
+import { getApiUrl, postRequest, wrapResult } from './utils'
 
 export async function getNewestMessages(phone, size) {
     return await axios({
