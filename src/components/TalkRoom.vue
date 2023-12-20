@@ -51,13 +51,19 @@
                     <!-- </ul> -->
                 </el-main>
                 <!-- Talk  Area -->
-                <el-footer id="talk-container">
-                    <div id="talk-input">
-                        <el-input v-model="input" type="textarea" :autosize="{ minRows: 1, maxRows: 2 }" resize="none" placeholder="输入文字与小助手交流"> </el-input>
-                    </div>
-                    <el-button :onclick="handleSend" type="primary" id="send-button" circle>
-                        <el-icon><Right /></el-icon>
+                <el-footer>
+                    <el-button type="info" style="margin-right: 10px" class="talk-button" circle>
+                        <el-icon><Delete /></el-icon>
                     </el-button>
+
+                    <div id="talk-container">
+                        <div id="talk-input">
+                            <el-input v-model="input" type="textarea" :autosize="{ minRows: 1, maxRows: 1 }" resize="none" placeholder="输入文字与小助手交流"> </el-input>
+                        </div>
+                        <el-button :onclick="handleSend" type="primary" class="talk-button" circle>
+                            <el-icon><Right /></el-icon>
+                        </el-button>
+                    </div>
                 </el-footer>
             </div>
         </div>
@@ -67,7 +73,7 @@
 </template>
 
 <script>
-import { Right, ChatDotRound, Setting } from '@element-plus/icons-vue'
+import { Right, ChatDotRound, Setting, Delete } from '@element-plus/icons-vue'
 import { sendMessage, getNewestMessages } from '../api/message'
 import { ref } from 'vue'
 import InfiniteLoading from 'v3-infinite-loading'
@@ -83,6 +89,7 @@ export default {
         Right,
         ChatDotRound,
         Setting,
+        Delete,
         InfiniteLoading,
         RolePromptDialog
     },
@@ -308,14 +315,18 @@ export default {
     margin-right: 10px;
     border-radius: 50%;
 }
-
+.el-footer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 5px 0 5px 0;
+    padding: 10px;
+}
 #talk-container {
     display: flex;
     align-items: center;
-    /* width: 100%; */
+    width: 100%;
     padding: 5px;
-    margin: 10px;
-    min-height: 50px;
     border: solid 1px #409eff;
     border-radius: 12px;
 }
@@ -329,13 +340,13 @@ export default {
         box-shadow: 0 0 0 0px;
     }
 }
-#send-button {
+.talk-button {
     min-width: 36px;
     min-height: 36px;
     margin: 0 5px;
 }
 .el-icon {
-    font-size: 20px;
+    font-size: 24px;
     color: white;
 }
 .comment {
