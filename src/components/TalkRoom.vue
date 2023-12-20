@@ -192,7 +192,7 @@ export default {
         },
         async pushHistoryMsg() {
             const curUserPhone = this.$store.state.userInfo.phone
-            const result = await getNewestMessages(curUserPhone, 10, this.curMessageList.length)
+            const result = await getNewestMessages(curUserPhone, this.curRole.name, 10, this.curMessageList.length)
 
             if (result.data.length == 0) {
                 return true

@@ -33,9 +33,10 @@ export async function sendMessage(phone, botRole, message) {
         })
 }
 
-export async function getNewestMessages(phone, number, offset) {
+export async function getNewestMessages(phone, botRole, number, offset) {
     return await getRequest(getApiUrl('messages'), {
         phone: phone,
+        botRole: botRole,
         num: number,
         offset: offset
     })
