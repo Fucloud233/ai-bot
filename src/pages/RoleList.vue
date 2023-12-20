@@ -66,7 +66,6 @@ export default {
 
         return { roleList }
     },
-    data() {},
     methods: {
         getProfileUrl(name) {
             return `/src/assets/profile/${name}.png`
