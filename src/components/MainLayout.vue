@@ -72,9 +72,7 @@ export default {
     color: white;
 }
 .el-footer {
-    display: flex;
     flex-direction: row;
-    align-items: center;
     height: 10%;
     padding: 10px;
     background: #f6f6f6;
