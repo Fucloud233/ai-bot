@@ -5,7 +5,7 @@ const routes = [
     {
         path: '/',
         name: 'login',
-        component: () => import('../components/LoginRegister.vue')
+        component: () => import('../pages/LoginRegister.vue')
     },
     {
         path: '/talk/:role/',
@@ -30,7 +30,7 @@ router.beforeEach(async (to, from) => {
     if (!hasLogged && to.name !== 'login') {
         return { name: 'login' }
     } else if (hasLogged && to.name == 'login') {
-        return { name: 'talk' }
+        return { name: 'main' }
     }
 })
 
