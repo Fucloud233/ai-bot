@@ -1,14 +1,19 @@
 <template>
     <MainLayout :title="curRoleLabel">
+        <template #leftTool>
+            <el-button type="primary" @click="$router.push('/main')" circle>
+                <el-icon><ArrowLeft /> </el-icon>
+            </el-button>
+        </template>
         <template #rightTool>
-            <el-button type="primary" @click="this.showRolePromptDialog = true" style="margin-right: 10px" circle>
+            <el-button type="primary" @click="this.showRolePromptDialog = true" circle>
                 <el-icon><Setting /> </el-icon>
             </el-button>
         </template>
 
         <template #main>
             <div id="message-container">
-                <InfiniteLoading @infinite="handleScroll" :top="true" :identifier="curRole" target="#message-container">
+                <InfiniteLoading @infinite="handleScroll" :top="true" target="#message-container">
                     <template #spinner> <span style="display: flex; justify-content: center; padding: 5px; color: gray"> loading</span> </template>
                     <template #complete><div></div> </template>
                 </InfiniteLoading>
@@ -58,7 +63,7 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { Right, ChatDotRound, Setting, Delete } from '@element-plus/icons-vue'
+import { Right, ArrowLeft, Setting, Delete } from '@element-plus/icons-vue'
 import InfiniteLoading from 'v3-infinite-loading'
 import 'v3-infinite-loading/lib/style.css'
 
@@ -72,8 +77,8 @@ import { getRoleLabel, getRoleProfileUrl } from '../utils'
 export default {
     name: 'TalkRoom',
     components: {
+        ArrowLeft,
         Right,
-        ChatDotRound,
         Setting,
         Delete,
         InfiniteLoading,

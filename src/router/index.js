@@ -8,9 +8,14 @@ const routes = [
         component: () => import('../components/LoginRegister.vue')
     },
     {
-        path: '/talk',
+        path: '/talk/:role/',
         name: 'talk',
-        component: () => import('../components/TalkRoom.vue')
+        component: () => import('../pages/TalkRoom.vue')
+    },
+    {
+        path: '/main',
+        name: 'main',
+        component: () => import('../pages/RoleList.vue')
     }
 ]
 

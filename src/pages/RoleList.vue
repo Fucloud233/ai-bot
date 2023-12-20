@@ -1,14 +1,13 @@
 <template>
     <MainLayout title="Ai解压小助手">
         <template #main>
+            <!-- roleList -->
             <div v-for="[i, role] of roleList.entries()" :key="i" :index="String(i)" class="role-container">
-                <el-button style="width: 100%; height: 50px; justify-content: start" text>
-                    <template #icon>
-                        <div style="display: flex; align-items: center; justify-content: start; width: 100%">
-                            <img :src="getProfileUrl(role.name)" class="profile" />
-                            <span style="font-style: normal">{{ role.label }}</span>
-                        </div>
-                    </template>
+                <el-button @click="this.$router.push(`/talk/${role.name}`)" style="width: 100%; height: 50px; justify-content: start" text>
+                    <div style="display: flex; align-items: center; justify-content: start; width: 100%">
+                        <img :src="getProfileUrl(role.name)" class="profile" />
+                    </div>
+                    <span style="font-style: normal">{{ role.label }}</span>
                 </el-button>
             </div>
         </template>
