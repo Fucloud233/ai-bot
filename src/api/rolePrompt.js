@@ -1,12 +1,10 @@
 import { getRequest, getApiUrl, putRequest } from './utils'
 
 export async function getRolePrompt(phone, botRole) {
-    const apiUrl = getApiUrl('role/prompt', {
+    return await getRequest(getApiUrl('role/prompt'), {
         phone: phone,
         botRole: botRole
     })
-
-    return await getRequest(apiUrl)
         .then((resp) => {
             const rolePrompt = resp.data.rolePrompt
             if (rolePrompt === undefined) {
