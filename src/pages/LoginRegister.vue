@@ -62,14 +62,14 @@ export default {
             isLogin: true,
 
             loginInfo: {
-                phone: '18212345678',
-                password: '1234567'
+                phone: '18212345678'
+                // password: '123456'
             },
             registerInfo: {
-                phone: '18212345678',
-                isMale: 1,
-                password: '123456',
-                passwordAgain: '123456'
+                // phone: '18212345678',
+                // isMale: 1,
+                // password: '123456',
+                // passwordAgain: '123456'
             },
             rules: {
                 phone: [
@@ -121,9 +121,9 @@ export default {
                     return
                 }
 
+                this.$store.commit('login', this.loginInfo.phone)
                 this.loginInfo = {}
-                this.$store.commit('login')
-                this.$router.push('/talk')
+                this.$router.push('/main')
             })
         },
         toRegister() {

@@ -3,12 +3,16 @@ import { createStore } from 'vuex'
 const store = createStore({
     state() {
         return {
-            hasLogged: false
+            hasLogged: false,
+            userInfo: {
+                phone: ''
+            }
         }
     },
     mutations: {
-        login(state) {
+        login(state, phone) {
             state.hasLogged = true
+            state.userInfo.phone = phone
         }
     }
 })
