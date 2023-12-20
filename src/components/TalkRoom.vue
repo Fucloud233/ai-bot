@@ -34,7 +34,7 @@
             <div style="display: flex; flex-direction: column; padding: 0; width: 100%">
                 <!-- Messages Area-->
                 <el-main id="message-container" style="overflow: auto">
-                    <InfiniteLoading @infinite="handleScroll" :top="true" target="#message-container">
+                    <InfiniteLoading @infinite="handleScroll" :top="true" :identifier="curRole" target="#message-container">
                         <template #spinner> <span style="display: flex; justify-content: center; padding: 5px; color: gray"> loading</span> </template>
                         <template #complete><div></div> </template>
                     </InfiniteLoading>
@@ -206,13 +206,14 @@ export default {
         },
         changeRole(index) {
             // backup previous message list
-            this.messageList[this.curRole.name] = this.curMessageList
+            this.messageList[this.curRole.name] = this.curMessageList.slice(-10)
 
             // modify current role and messageList
             this.curRole = this.roleList[index]
             this.curRoleProfileUrl = this.getProfileUrl(this.curRole.name)
             this.curMessageList = this.messageList[this.curRole.name]
 
+            this.isCompeted = false
             this.isSelecting = false
         },
         getProfileUrl(name) {
