@@ -48,11 +48,11 @@
                             </div>
                         </div>
                     </div>
-                    <!-- </ul> -->
                 </el-main>
+
                 <!-- Talk  Area -->
                 <el-footer>
-                    <el-button type="info" style="margin-right: 10px" class="talk-button" circle>
+                    <el-button @click="showCheckDelete = true" type="info" style="margin-right: 10px" class="talk-button" circle>
                         <el-icon><Delete /></el-icon>
                     </el-button>
 
@@ -60,7 +60,7 @@
                         <div id="talk-input">
                             <el-input v-model="input" type="textarea" :autosize="{ minRows: 1, maxRows: 1 }" resize="none" placeholder="输入文字与小助手交流"> </el-input>
                         </div>
-                        <el-button :onclick="handleSend" type="primary" class="talk-button" circle>
+                        <el-button @click="handleSend" type="primary" class="talk-button" circle>
                             <el-icon><Right /></el-icon>
                         </el-button>
                     </div>
@@ -69,12 +69,20 @@
         </div>
     </el-container>
 
+    <el-dialog title="提示" v-model="showCheckDelete" style="max-width: 300px; width: 80%">
+        <p>聊天记录删除后将无法恢复，你确定要删除吗？</p>
+        <template #footer>
+            <el-button type="danger" @click="handleDelete">确定</el-button>
+            <el-button @click="showCheckDelete = false"> 取消 </el-button>
+        </template>
+    </el-dialog>
+
     <RolePromptDialog title="自定义角色描述" v-if="showRolePromptDialog" :closed="() => (showRolePromptDialog = false)" :bot-role="curRole.name"></RolePromptDialog>
 </template>
 
 <script>
 import { Right, ChatDotRound, Setting, Delete } from '@element-plus/icons-vue'
-import { sendMessage, getNewestMessages } from '../api/message'
+import { sendMessage, getNewestMessages, deleteAllMessage } from '../api/message'
 import { ref } from 'vue'
 import InfiniteLoading from 'v3-infinite-loading'
 import 'v3-infinite-loading/lib/style.css'
@@ -106,6 +114,8 @@ export default {
             isReceiving: false,
             isCompeted: false,
             showRolePromptDialog: false,
+            showCheckDelete: false,
+
             // talking
             input: ''
         }
@@ -174,6 +184,14 @@ export default {
             // update the message
             this.modifyLastMessage(result.data)
             this.isReceiving = false
+        },
+        async handleDelete() {
+            if (this.curMessageList.length != 0) {
+                this.curMessageList = []
+                await deleteAllMessage(this.$store.state.userInfo.phone, this.curRole.name)
+            }
+
+            this.showCheckDelete = false
         },
         async handleScroll($state) {
             if (this.isCompeted) {

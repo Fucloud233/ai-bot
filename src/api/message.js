@@ -1,4 +1,4 @@
-import { getApiUrl, getRequest, postRequest, wrapResult } from './utils'
+import { getApiUrl, getRequest, postRequest, deleteRequest, wrapResult } from './utils'
 
 export async function chat(messages) {
     const apiUrl = getApiUrl('chat')
@@ -31,6 +31,15 @@ export async function sendMessage(phone, botRole, message) {
         .catch(() => {
             return wrapResult(false, '')
         })
+}
+
+export async function deleteAllMessage(phone, botRole) {
+    return await deleteRequest(getApiUrl('message/all'), {
+        phone: phone,
+        botRole: botRole
+    })
+        .then(() => {})
+        .catch(() => {})
 }
 
 export async function getNewestMessages(phone, botRole, number, offset) {
