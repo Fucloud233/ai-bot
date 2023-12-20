@@ -1,5 +1,5 @@
 <template>
-    <MainLayout :title="curRole.label">
+    <MainLayout :title="curRoleLabel">
         <template #rightTool>
             <el-button type="primary" @click="this.showRolePromptDialog = true" style="margin-right: 10px" circle>
                 <el-icon><Setting /> </el-icon>
@@ -26,18 +26,21 @@
         </template>
 
         <template #footer>
-            <el-button @click="showCheckDelete = true" type="info" style="margin-right: 10px" class="talk-button" circle>
-                <el-icon><Delete /></el-icon>
-            </el-button>
+            <div class="footer">
+                <el-button @click="showCheckDelete = true" type="info" style="margin-right: 10px" class="talk-button" circle>
+                    <el-icon><Delete /></el-icon>
+                </el-button>
 
-            <div id="talk-container">
-                <div id="talk-input">
-                    <el-input v-model="input" type="textarea" :autosize="{ minRows: 1, maxRows: 1 }" resize="none" placeholder="输入文字与小助手交流"> </el-input>
+                <div id="talk-container">
+                    <div id="talk-input">
+                        <el-input v-model="input" type="textarea" :autosize="{ minRows: 1, maxRows: 1 }" resize="none" placeholder="输入文字与小助手交流"> </el-input>
+                    </div>
+                    <el-button @click="handleSend" type="primary" class="talk-button" circle>
+                        <el-icon><Right /></el-icon>
+                    </el-button>
                 </div>
-                <el-button @click="handleSend" type="primary" class="talk-button" circle>
-                    <el-icon><Right /></el-icon>
-                </el-button></div
-        ></template>
+            </div>
+        </template>
     </MainLayout>
 
     <el-dialog title="提示" v-model="showCheckDelete" style="max-width: 300px; width: 80%">
@@ -48,18 +51,21 @@
         </template>
     </el-dialog>
 
-    <RolePromptDialog title="自定义角色描述" v-if="showRolePromptDialog" :closed="() => (showRolePromptDialog = false)" :bot-role="curRole.name"></RolePromptDialog>
+    <RolePromptDialog title="自定义角色描述" v-if="showRolePromptDialog" :closed="() => (showRolePromptDialog = false)" :bot-role="curRole"></RolePromptDialog>
 </template>
 
 <script>
-import { Right, ChatDotRound, Setting, Delete } from '@element-plus/icons-vue'
-import { sendMessage, getNewestMessages, deleteAllMessage } from '../api/message'
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+import { Right, ChatDotRound, Setting, Delete } from '@element-plus/icons-vue'
 import InfiniteLoading from 'v3-infinite-loading'
 import 'v3-infinite-loading/lib/style.css'
 
 import RolePromptDialog from '../components/RolePromptDialog.vue'
 import MainLayout from '../components/MainLayout.vue'
+import { sendMessage, getNewestMessages, deleteAllMessage } from '../api/message'
+import { getRoleLabel, getRoleProfileUrl } from '../utils'
 
 // https://github.com/element-plus/element-plus/pull/12484
 
@@ -76,12 +82,8 @@ export default {
     },
     data() {
         return {
-            //init
-            initRoleId: 0,
-            curRoleId: -1,
-            curRole: { name: 'parent' },
-            curRoleProfileUrl: null,
             curMessageList: [],
+
             //status
             isSelecting: false,
             isReceiving: false,
@@ -94,40 +96,11 @@ export default {
         }
     },
     setup() {
-        // role
-        const roleList = ref([
-            {
-                label: '父母',
-                name: 'parent'
-            },
-            {
-                label: '闺蜜',
-                name: 'bestie'
-            },
-            {
-                label: '朋友',
-                name: 'friend'
-            },
-            {
-                label: '心理医生',
-                name: 'doctor'
-            }
-        ])
-        var messageList = ref({})
-        for (let role of roleList.value) {
-            messageList.value[role.name] = []
-        }
+        const curRole = ref(useRoute().params.role)
+        const curRoleLabel = ref(getRoleLabel(curRole.value))
+        const curRoleProfileUrl = ref(getRoleProfileUrl(curRole.value))
 
-        // append a empty array for render
-        messageList.value['null'] = []
-
-        return {
-            roleList,
-            messageList
-        }
-    },
-    async mounted() {
-        this.changeRole(this.initRoleId)
+        return { curRole, curRoleLabel, curRoleProfileUrl }
     },
     methods: {
         // handle function
@@ -147,7 +120,7 @@ export default {
 
             // receive message
             const phone = this.$store.state.userInfo.phone
-            const result = await sendMessage(phone, this.curRole.name, messageToSend)
+            const result = await sendMessage(phone, this.curRole, messageToSend)
             if (!result.flag) {
                 // this.pushAssistantMessage(result.data)
                 this.modifyLastMessage('不好意思，我有点事情，稍后再回复你。')
@@ -161,7 +134,7 @@ export default {
         async handleDelete() {
             if (this.curMessageList.length != 0) {
                 this.curMessageList = []
-                await deleteAllMessage(this.$store.state.userInfo.phone, this.curRole.name)
+                await deleteAllMessage(this.$store.state.userInfo.phone, this.curRole)
             }
 
             this.showCheckDelete = false
@@ -190,7 +163,7 @@ export default {
         },
         async pushHistoryMsg() {
             const curUserPhone = this.$store.state.userInfo.phone
-            const result = await getNewestMessages(curUserPhone, this.curRole.name, 10, this.curMessageList.length)
+            const result = await getNewestMessages(curUserPhone, this.curRole, 10, this.curMessageList.length)
 
             if (result.data.length == 0) {
                 return true
@@ -199,29 +172,7 @@ export default {
             return false
         },
         modifyLastMessage(message) {
-            const curRoleName = this.curRole.name
             this.curMessageList[this.curMessageList.length - 1].content = message
-        },
-        changeRole(index) {
-            // backup previous message list
-            this.messageList[this.curRole.name] = this.curMessageList.slice(-10)
-
-            // modify current role and messageList
-            this.curRole = this.roleList[index]
-            this.curRoleProfileUrl = this.getProfileUrl(this.curRole.name)
-            this.curMessageList = this.messageList[this.curRole.name]
-
-            this.isCompeted = false
-            this.isSelecting = false
-        },
-        getProfileUrl(name) {
-            try {
-                // return require(`../assets/profile/${name}.png`)
-                return `/src/assets/profile/${name}.png`
-            } catch (error) {
-                // return require('../assets/profile/bot.jpg')
-                return '/src/assets/profile/bot.jpg'
-            }
         },
         checkNeedLoading(index) {
             return this.isReceiving && index === this.curMessageList.length - 1
@@ -303,11 +254,11 @@ export default {
     font-size: 24px;
     color: white;
 }
-.comment {
-    position: absolute;
-    bottom: 0;
-    font-size: small;
-    color: gray;
-    margin-bottom: 10px;
+.footer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    height: 100%;
 }
 </style>
