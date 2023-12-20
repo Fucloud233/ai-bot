@@ -54,6 +54,7 @@ func PostMessages(c *gin.Context) {
 func PostMessage(c *gin.Context) {
 	var content struct{
 		Message string
+		// TODO: check BotRole exists
 		BotRole string
 		Phone string
 		Duration int
@@ -75,7 +76,7 @@ func PostMessage(c *gin.Context) {
 	}
 
 	// 2. search history from newest database
-	historyMessages, err := model.GetNewestMessage(content.Phone, 10, 0, content.Duration);
+	historyMessages, err := model.GetNewestMessage(content.Phone, content.BotRole, 10, 0, content.Duration);
 	if err != nil {
 		historyMessages = []model.Message{}
 	} else if len(historyMessages) >= 2 {
@@ -119,6 +120,7 @@ func PostMessage(c *gin.Context) {
 
 func GetNewestMessage(c *gin.Context) {
 	phone := c.Query("phone")
+	botRole := c.Query("botRole")
 	num, err1 := strconv.Atoi(c.Query("num"))
 	offset, err2 := strconv.Atoi(c.Query("offset"))
 
@@ -138,7 +140,7 @@ func GetNewestMessage(c *gin.Context) {
 	var result struct {
 		Messages []model.Message `json:"messages" binding:"dive"`
 	}
-	messages, err := model.GetMessages(phone, num, offset)
+	messages, err := model.GetMessages(phone, botRole, num, offset)
 	result.Messages = messages
 
 	status := http.StatusOK
