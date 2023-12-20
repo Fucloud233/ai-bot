@@ -11,6 +11,17 @@ export function postRequest(apiUrl, data) {
     })
 }
 
+export function deleteRequest(apiUrl, data) {
+    return axios({
+        method: 'delete',
+        url: apiUrl,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data: data
+    })
+}
+
 export function putRequest(apiUrl, data) {
     return axios({
         method: 'put',
