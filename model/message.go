@@ -45,9 +45,25 @@ func AddMessages(messages *[]Message) error {
 	return DB.Create(&messages).Error
 }
 
-func GetNewestMessage(phone string, number int, size int) ([]Message, error) {
+func GetNewestMessage(phone string, number int, offset int, duration int) ([]Message, error) {
 	var message []Message
-	err := DB.Order("id desc").Limit(number).Offset(size).Where("phone = ?", phone).Find(&message).Error
+
+	// get messages in N minutes
+	err := DB.Select([]string{
+		"*", "TIMESTAMPDIFF(MINUTE, time, NOW()) as diff",
+	}).Where("phone = ?", phone).Order("id desc").Limit(number).Offset(offset).Having("diff < ?", duration).Find(&message).Error
+
+	// reserve array
+	for i, j := 0, len(message)-1; i < j; i, j = i+1, j-1 {
+		message[i], message[j] = message[j], message[i]
+	}
+	return message, err
+} 
+
+func GetMessages(phone string, number int, offset int ) ([]Message, error) {
+	var message []Message
+	err := DB.Order("id desc").Limit(number).Offset(offset).Where("phone = ?", phone).Find(&message).Error
+	
 	// reserve array
 	for i, j := 0, len(message)-1; i < j; i, j = i+1, j-1 {
 		message[i], message[j] = message[j], message[i]

@@ -56,6 +56,7 @@ func PostMessage(c *gin.Context) {
 		Message string
 		BotRole string
 		Phone string
+		Duration int
 	}
 
 	sendTime := time.Now()
@@ -74,7 +75,7 @@ func PostMessage(c *gin.Context) {
 	}
 
 	// 2. search history from newest database
-	historyMessages, err := model.GetNewestMessage(content.Phone, 10, 0);
+	historyMessages, err := model.GetNewestMessage(content.Phone, 10, 0, content.Duration);
 	if err != nil {
 		historyMessages = []model.Message{}
 	} else if len(historyMessages) >= 2 {
@@ -119,7 +120,7 @@ func PostMessage(c *gin.Context) {
 func GetNewestMessage(c *gin.Context) {
 	phone := c.Query("phone")
 	num, err1 := strconv.Atoi(c.Query("num"))
-	size, err2 := strconv.Atoi(c.Query("size"))
+	offset, err2 := strconv.Atoi(c.Query("offset"))
 
 	if phone == "" {
 		c.JSON(http.StatusBadRequest,  error.GetErrorMessage(error.ParamLose))
@@ -130,14 +131,14 @@ func GetNewestMessage(c *gin.Context) {
 	} else if err1 != nil {
 		num = 10
 	} else if err2 != nil {
-		size = 0;
+		offset = 0
 	}
 
 	// convert message to result
 	var result struct {
 		Messages []model.Message `json:"messages" binding:"dive"`
 	}
-	messages, err := model.GetNewestMessage(phone, num, size)
+	messages, err := model.GetMessages(phone, num, offset)
 	result.Messages = messages
 
 	status := http.StatusOK
