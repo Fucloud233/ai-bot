@@ -13,7 +13,7 @@
 
         <template #main>
             <div id="message-container">
-                <InfiniteLoading @infinite="handleScroll" :top="true" target="#message-container">
+                <InfiniteLoading @infinite="handleScroll" :top="true" :firstload="false" target="#message-container">
                     <template #spinner> <span style="display: flex; justify-content: center; padding: 5px; color: gray"> loading</span> </template>
                     <template #complete><div></div> </template>
                 </InfiniteLoading>
@@ -106,6 +106,9 @@ export default {
         const curRoleProfileUrl = ref(getRoleProfileUrl(curRole.value))
 
         return { curRole, curRoleLabel, curRoleProfileUrl }
+    },
+    mounted() {
+        this.pushHistoryMsg()
     },
     methods: {
         // handle function
