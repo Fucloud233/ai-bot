@@ -41,7 +41,7 @@
 
 <script>
 import { ElMessage } from 'element-plus'
-import { register, login } from '../api/db'
+import { register, login } from '../api/user'
 
 export default {
     name: 'Login',

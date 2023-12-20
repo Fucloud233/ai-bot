@@ -22,31 +22,32 @@ export function putRequest(apiUrl, data) {
     })
 }
 
-export function getRequest(apiUrl) {
+export function getRequest(apiUrl, params) {
     return axios({
         method: 'get',
         url: apiUrl,
+        params: params,
         headers: {
             'Content-Type': 'application/json'
         }
     })
 }
 
-export function getApiUrl(name, origin_params) {
+export function getApiUrl(name) {
     var apiUrl = '/api/' + name
 
-    if (origin_params !== undefined) {
-        var params = Object.entries(origin_params)
+    // if (origin_params !== undefined) {
+    //     var params = Object.entries(origin_params)
 
-        if (params.length != 0) {
-            apiUrl += '?'
-            for (const param of params) {
-                apiUrl += `${param[0]}=${param[1]}&`
-            }
-        }
-        // kill the last &
-        apiUrl = apiUrl.slice(0, -1)
-    }
+    //     if (params.length != 0) {
+    //         apiUrl += '?'
+    //         for (const param of params) {
+    //             apiUrl += `${param[0]}=${param[1]}&`
+    //         }
+    //     }
+    //     // kill the last &
+    //     apiUrl = apiUrl.slice(0, -1)
+    // }
 
     return apiUrl
 }

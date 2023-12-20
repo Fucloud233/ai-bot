@@ -68,8 +68,7 @@
 
 <script>
 import { Right, ChatDotRound, Setting } from '@element-plus/icons-vue'
-import { sendMessage } from '../api/llm'
-import { getNewestMessages } from '../api/db'
+import { sendMessage, getNewestMessages } from '../api/message'
 import { ref } from 'vue'
 import InfiniteLoading from 'v3-infinite-loading'
 import 'v3-infinite-loading/lib/style.css'
@@ -193,7 +192,7 @@ export default {
         },
         async pushHistoryMsg() {
             const curUserPhone = this.$store.state.userInfo.phone
-            const result = await getNewestMessages(curUserPhone, this.curMessageList.length)
+            const result = await getNewestMessages(curUserPhone, 10, this.curMessageList.length)
 
             if (result.data.length == 0) {
                 return true
