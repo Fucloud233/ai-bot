@@ -47,10 +47,12 @@ func ChatWithRole(role string, roleDescription string, historyMessages []model.M
 		// (1) basic role prompt
 		fmt.Sprintf("你现在是我的%s。", model.GetRoleName(role)) +
 		// (2) description about role from user
-		roleDescription +
+		roleDescription + "\n" +
 		// (3) some prompt about this project
 		"我现在学习、工作或者生活上有点压力，请你帮我缓解一下我和压力和焦虑。"+
         "请控制你的回答在20个字之间。"
+
+	fmt.Println("Prompt: ", basic_prompt)
 
 	messages := wrapBasicPrompt(basic_prompt, "好的，我一定会控制回答字数的")
 
