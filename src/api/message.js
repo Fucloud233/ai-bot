@@ -23,7 +23,8 @@ export async function sendMessage(phone, botRole, message) {
     return await postRequest(apiUrl, {
         phone: phone,
         botRole: botRole,
-        message: message
+        message: message,
+        duration: 10
     })
         .then((resp) => {
             return wrapResult(true, resp.data.message)
