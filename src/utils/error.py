@@ -1,0 +1,2 @@
+UserNotFound = FileNotFoundError()
+UserExist = ValueError()
