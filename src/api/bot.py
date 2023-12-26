@@ -1,13 +1,14 @@
-from flask import request
-from utils.api import wrap_response
+from flask import request, Blueprint
 
-from api import app
+bot_api = Blueprint('bot_api', __name__)
+
+from utils.api import wrap_response
 from bot import Bot, BotRole
 
 bot = Bot()
 
 # post request
-@app.route("/chat", methods=['POST'])
+@bot_api.route("/chat", methods=['POST'])
 def chat():
     messages = request.json['messages']
 
@@ -21,7 +22,7 @@ def chat():
 
     return wrap_response(result)
 
-@app.route("/chat/<string:role_name>", methods=['POST'])
+@bot_api.route("/chat/<string:role_name>", methods=['POST'])
 def chat_with_role(role_name):
     try:
         # get the role

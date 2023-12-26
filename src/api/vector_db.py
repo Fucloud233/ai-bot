@@ -1,6 +1,7 @@
-from flask import request
+from flask import request, Blueprint
 
-from api import app
+vector_db_api = Blueprint('vector_db_api', __name__)
+
 from chroma import VectorDB
 from utils.vector_db import format_messages
 from utils.api import wrap_response
@@ -8,7 +9,7 @@ from utils.api import wrap_response
 # vector database - chromadb
 vector_db = VectorDB()
 
-@app.route("/vectordb/init", methods=['POST'])
+@vector_db_api.route("/vectordb/init", methods=['POST'])
 def init_database():
     phone = request.json['phone']
     try:
@@ -18,7 +19,7 @@ def init_database():
         return wrap_response('user has existed', 400)
 
 
-@app.route("/vectordb/messages", methods=['POST'])
+@vector_db_api.route("/vectordb/messages", methods=['POST'])
 def add_messages():
     body = request.json
 
@@ -37,7 +38,7 @@ def add_messages():
         return wrap_response(repr(e), 400)
 
 
-@app.route("/vectordb/messages", methods=['GET'])
+@vector_db_api.route("/vectordb/messages", methods=['GET'])
 def clear_messages():
     phone = request.args.get('phone')
     result = vector_db.get_messages(phone)
@@ -45,7 +46,7 @@ def clear_messages():
         "messages": result['documents']
     })  
 
-@app.route("/vectordb/messages/all", methods=['DELETE'])
+@vector_db_api.route("/vectordb/messages/all", methods=['DELETE'])
 def get_messages():
     try:
         phone = request.json['phone']
