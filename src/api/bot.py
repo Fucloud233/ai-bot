@@ -1,8 +1,10 @@
 from flask import request, Blueprint
+from typing import List
 
 bot_api = Blueprint('bot_api', __name__)
 
 from utils.api import wrap_response
+from utils.prompt import wrap_user_prompt
 from bot import Bot, BotRole
 
 bot = Bot()
@@ -22,7 +24,7 @@ def chat():
 
     return wrap_response(result)
 
-@bot_api.route("/chat/<string:role_name>", methods=['POST'])
+@bot_api.route('/chat/context/<string:role_name>', methods=['POST'])
 def chat_with_role(role_name):
     try:
         # get the role
@@ -40,3 +42,38 @@ def chat_with_role(role_name):
     except TypeError as e:
         print(e.with_traceback())
         return wrap_response(repr(e), 400)
+    
+@bot_api.route("/chat/enhance", methods=['POST'])
+def chat_with_role_enhance():
+    body = request.json
+
+    # 1. catch the message
+    try:
+        bot_role = BotRole.new(body["botRole"])
+        user_message = body['userMessage']
+
+        # optional
+        bot_role_description = body.get("BotRoleDescription")
+        history_messages: List = body.get("historyMessages")
+
+        if bot_role_description is None:
+            bot_role_description = ""
+        if history_messages is None:
+            history_messages = []
+        
+    except KeyError as e:
+        return wrap_response(repr(e), 400)
+    
+    # 2. merge the basic prompt and role
+    try:
+        history_messages.append(wrap_user_prompt(user_message))
+
+        result = bot.talk_with_custom_role(
+            history_messages,
+            bot_role,
+            bot_role_description
+        )
+        return wrap_response(result)
+    except Exception as e:
+        return wrap_response(repr(e), 400)
+    
