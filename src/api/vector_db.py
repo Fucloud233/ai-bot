@@ -39,15 +39,15 @@ def add_messages():
 
 
 @vector_db_api.route("/vectordb/messages", methods=['GET'])
-def clear_messages():
+def get_messages():
     phone = request.args.get('phone')
-    result = vector_db.get_messages(phone)
+    messages = vector_db.get_messages(phone)
     return wrap_response({
-        "messages": result['documents']
+        "messages": messages
     })  
 
 @vector_db_api.route("/vectordb/messages/all", methods=['DELETE'])
-def get_messages():
+def clear_messages():
     try:
         phone = request.json['phone']
         vector_db.clear_messages(phone)
