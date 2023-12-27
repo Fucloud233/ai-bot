@@ -1,6 +1,7 @@
 import erniebot
 from enum import Enum
 from typing import List
+from pprint import pprint
 
 from config import Config
 from utils.prompt import wrap_prompt
@@ -15,7 +16,7 @@ models = erniebot.Model.list()
 
 # role
 User = 'user'
-Assistant = 'Assistant'
+Assistant = 'assistant'
 
 class ModelKind(Enum):
     Ernie = 'ernie-bot'
@@ -41,6 +42,10 @@ class BotRole(Enum):
 class Bot:
 
     FirstPromptDefaultAnswer = "好的，我一定会控制回答字数的"
+    # TODO: perfect this prompt
+    ProjectPrompt = \
+        "我现在学习、工作或者生活上有点压力，请你帮我缓解一下我和压力和焦虑。" \
+        "请控制你的回答在20个字之间。"
 
     @staticmethod
     def talk(messages, model_kind: ModelKind=ModelKind.Ernie):
@@ -70,7 +75,8 @@ class Bot:
         )
         prompts.extend(messages)
 
-        # print(prompts)
+        print("prompt:")
+        pprint(prompts)
         
         return Bot.talk(prompts, model_kind)
 
@@ -92,9 +98,7 @@ def gen_prompt(bot_role: BotRole, bot_role_description: str=""):
     # (2) description about role from user
     description = bot_role_description + '\n'
     # (3) some prompt about this project 
-    project_prompt = \
-        "我现在学习、工作或者生活上有点压力，请你帮我缓解一下我和压力和焦虑。" \
-        "请控制你的回答在20个字之间。"
+    project_prompt = Bot.ProjectPrompt
 
     return basic_prompt + description + project_prompt
 
