@@ -4,8 +4,8 @@ from typing import List
 bot_api = Blueprint('bot_api', __name__)
 
 from utils.api import wrap_response
-from utils.prompt import wrap_user_prompt
-from bot import Bot, BotRole
+from utils.prompt import wrap_prompt
+from bot import Bot, BotRole, User, Assistant
 
 bot = Bot()
 
@@ -24,7 +24,7 @@ def chat():
 
     return wrap_response(result)
 
-@bot_api.route('/chat/context/<string:role_name>', methods=['POST'])
+@bot_api.route('/chat/<string:role_name>', methods=['POST'])
 def chat_with_role(role_name):
     try:
         # get the role
@@ -43,12 +43,16 @@ def chat_with_role(role_name):
         print(e.with_traceback())
         return wrap_response(repr(e), 400)
     
+
+from api.vector_db import vector_db
+
 @bot_api.route("/chat/enhance", methods=['POST'])
 def chat_with_role_enhance():
     body = request.json
 
     # 1. catch the message
     try:
+        phone = body['phone']
         bot_role = BotRole.new(body["botRole"])
         user_message = body['userMessage']
 
@@ -66,13 +70,18 @@ def chat_with_role_enhance():
     
     # 2. merge the basic prompt and role
     try:
-        history_messages.append(wrap_user_prompt(user_message))
+        vector_db.query("18212345678", "你好")
+
+        history_messages.append(wrap_prompt(user_message))
 
         result = bot.talk_with_custom_role(
             history_messages,
             bot_role,
             bot_role_description
         )
+
+        vector_db.append_messages(phone, [user_message, result], [User, Assistant])
+
         return wrap_response(result)
     except Exception as e:
         return wrap_response(repr(e), 400)

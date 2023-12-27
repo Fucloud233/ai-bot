@@ -5,8 +5,7 @@ from typing import List
 from chromadb.utils import embedding_functions
 
 from utils.error import UserNotFound, UserExist
- 
- 
+from utils.vector_db import to_messages
     
 class VectorDB:
     def __init__(self, path: str='chroma/'):
@@ -53,7 +52,17 @@ class VectorDB:
         self.client.create_collection(phone)
 
     def get_messages(self, phone: str):
-        return self.__get_collection(phone).get()
+        result = self.__get_collection(phone).get()
+        return to_messages(result, True)
     
+    # TODO: check duplicated message between query messages and history messages
+    def query(self, phone: str, message: str):
+        collection = self.__get_collection(phone)
+        result = collection.query(query_texts=message, n_results=1)
+        messages =  to_messages(result[0])
+        print(messages)
+
+        return messages
+
     def debug(self):
         print("debug: ", self.client.list_collections())
