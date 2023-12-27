@@ -4,7 +4,7 @@ from typing import List
 bot_api = Blueprint('bot_api', __name__)
 
 from utils.api import wrap_response
-from utils.prompt import wrap_prompt
+from utils.prompt import wrap_user_prompt
 from bot import Bot, BotRole, User, Assistant
 
 bot = Bot()
@@ -72,7 +72,7 @@ def chat_with_role_enhance():
     try:
         vector_db.query("18212345678", "你好")
 
-        history_messages.append(wrap_prompt(user_message))
+        history_messages.append(wrap_user_prompt(user_message))
 
         result = bot.talk_with_custom_role(
             history_messages,
