@@ -13,6 +13,10 @@ erniebot.access_token = Config.access_token
 
 models = erniebot.Model.list()
 
+# role
+User = 'user'
+Assistant = 'Assistant'
+
 class ModelKind(Enum):
     Ernie = 'ernie-bot'
     ErnieTurbo = 'ernie-bot-turbo'
@@ -66,7 +70,7 @@ class Bot:
         )
         prompts.extend(messages)
 
-        print(prompts)
+        # print(prompts)
         
         return Bot.talk(prompts, model_kind)
 
