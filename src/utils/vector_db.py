@@ -17,9 +17,15 @@ def format_messages(messages):
 
 #     return messages
 
-def to_messages(result: QueryResult, need_id: bool=False):
+def unwrap_array(array, is_multiple: bool):
+    return array[0] if is_multiple else array
+
+def to_messages(result: QueryResult, is_multiple: bool=False, need_id: bool=False):
+    documents = unwrap_array(result['documents'], is_multiple)
+    metadatas = unwrap_array(result['metadatas'], is_multiple)
+
     messages = []
-    for (document, metadata) in zip(result['documents'], result['metadatas']):
+    for (document, metadata) in zip(documents, metadatas):
         messages.append({
             "role": metadata['role'],
             "content": document,
@@ -27,8 +33,8 @@ def to_messages(result: QueryResult, need_id: bool=False):
         })
 
     if need_id:
-        for (message, id) in zip(messages, result['ids']):
-            message['id'] = id
+        for (message, metadata) in zip(messages, metadatas):
+            message['id'] = metadata['id']
 
     return messages
     

@@ -19,13 +19,13 @@ class VectorDB:
         except:
             raise UserExist
 
-
     def __get_collection(self, phone: str):
         try:
             return self.client.get_collection(phone, embedding_function=self.embedding_function) 
         except ValueError:
             raise UserNotFound
 
+    # TODO: set roleType when append messages
     def append_messages(self, phone: str, contents: List[str], roles: List[str]):
         if len(contents) != len(roles):
             raise ValueError('the length of contents is not equal with the roles')
@@ -53,13 +53,14 @@ class VectorDB:
 
     def get_messages(self, phone: str):
         result = self.__get_collection(phone).get()
-        return to_messages(result, True)
+        return to_messages(result, need_id=True)
     
     # TODO: check duplicated message between query messages and history messages
     def query(self, phone: str, message: str):
         collection = self.__get_collection(phone)
         result = collection.query(query_texts=message, n_results=1)
-        messages =  to_messages(result[0])
+
+        messages = to_messages(result, is_multiple=True)
         print(messages)
 
         return messages
