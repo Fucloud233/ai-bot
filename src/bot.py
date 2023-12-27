@@ -1,7 +1,9 @@
 import erniebot
-from config import Config
 from enum import Enum
 from typing import List
+
+from config import Config
+from utils.prompt import wrap_prompt
 
 # https://github.com/PaddlePaddle/ERNIE-Bot-SDK
 
@@ -33,6 +35,9 @@ class BotRole(Enum):
             case BotRole.Doctor: return "心理医生"
 
 class Bot:
+
+    FirstPromptDefaultAnswer = "好的，我一定会控制回答字数的"
+
     @staticmethod
     def talk(messages, model_kind: ModelKind=ModelKind.Ernie):
         response = erniebot.ChatCompletion.create(
@@ -44,12 +49,29 @@ class Bot:
     
     @staticmethod
     def talk_with_role(messages: List[str], bot_role: BotRole, model_kind: ModelKind=ModelKind.Ernie):
-        prompts = wrap_prompt(gen_prompt(bot_role))
+        prompts = wrap_prompt(gen_prompt(bot_role), Bot.FirstPromptDefaultAnswer)
         prompts.extend(messages)
 
         return Bot.talk(prompts, model_kind)
+    
+    @staticmethod
+    def talk_with_custom_role(
+        messages: List[str], 
+        bot_role: BotRole, 
+        bot_role_description: str,
+        model_kind: ModelKind=ModelKind.Ernie 
+    ):
+        prompts = wrap_prompt(
+            gen_prompt(bot_role, bot_role_description), Bot.FirstPromptDefaultAnswer
+        )
+        prompts.extend(messages)
 
-def gen_prompt(bot_role: BotRole):
+        print(prompts)
+        
+        return Bot.talk(prompts, model_kind)
+
+# [deprecated]
+def gen_prompt_old(bot_role: BotRole):
     label = bot_role.get_label()
     role_prompt = f"你现在是我的{label}。"
     
@@ -58,15 +80,19 @@ def gen_prompt(bot_role: BotRole):
     
     return role_prompt + basic_prompt
 
-def wrap_prompt(prompt):
-    # messages must have an odd number of elements
-    return [{
-        "role": "user",
-        "content": prompt
-    }, {
-        "role": "assistant",
-        "content": "好的，我知道了。"
-    }]
+def gen_prompt(bot_role: BotRole, bot_role_description: str=""):
+    label = bot_role.get_label()
+
+    # (1) basic role prompt 
+    basic_prompt =  f"你现在是我的{label}。"
+    # (2) description about role from user
+    description = bot_role_description + '\n'
+    # (3) some prompt about this project 
+    project_prompt = \
+        "我现在学习、工作或者生活上有点压力，请你帮我缓解一下我和压力和焦虑。" \
+        "请控制你的回答在20个字之间。"
+
+    return basic_prompt + description + project_prompt
 
 def main():
     print(Bot.talk([{
