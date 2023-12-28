@@ -4,6 +4,9 @@ class Config:
     api_type = ""
     access_token = ""
 
+    # chroma
+    database_path = 'data/chroma'
+
     @staticmethod
     def init():
         try:

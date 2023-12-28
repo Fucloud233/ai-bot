@@ -9,8 +9,10 @@ from pprint import pprint
 
 from utils.vector_db import to_messages
 from utils.prompt import Assistant
+from config import Config
 
 embedding_model = "distiluse-base-multilingual-cased-v1"
+database_path = Config.database_path
 
 def merge_name(phone: str, bot_role):
     return phone + '-' + bot_role
@@ -22,8 +24,8 @@ def unwrap_name(info):
         raise KeyError("key info not found")
     
 class VectorDB:
-    def __init__(self, path: str='chroma/'):
-        self.client = chromadb.PersistentClient(path=path)
+    def __init__(self):
+        self.client = chromadb.PersistentClient(path=database_path)
         self.embedding_function = embedding_functions \
             .SentenceTransformerEmbeddingFunction(model_name=embedding_model)
         
