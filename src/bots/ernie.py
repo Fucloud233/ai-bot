@@ -2,7 +2,7 @@ import erniebot
 from enum import Enum
 from typing import List
 
-from bot.base import BasicBot
+from bots.base import BasicBot
 from utils.config import ErineConfig
 
 # https://github.com/PaddlePaddle/ERNIE-Bot-SDK
