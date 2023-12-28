@@ -9,20 +9,32 @@ from utils.api import wrap_response, wrap_error
 # vector database - chromadb
 vector_db = VectorDB()
 
-def get_basic_info():
+def recv_info():
     try:
         phone = request.json['phone']
         bot_role = request.json['botRole']
     except:
         raise KeyError("key info not found")
 
-    return phone, bot_role
+    return {
+        "phone": phone, 
+        "botRole": bot_role
+    }
+
+def recv_info_from_param():
+    try:
+        return {
+            "phone": request.args.get('phone'),
+            "botRole": request.args.get('botRole')
+        }
+    except:
+        raise KeyError("key info not found")
 
 @vector_db_api.route("/vectordb/init", methods=['POST'])
 def init_database():
     try:
-        phone, bot_role = get_basic_info()
-        vector_db.init(phone, bot_role)
+        info = recv_info()
+        vector_db.init(info)
         return wrap_response()
     except (KeyError, ValueError) as e:
         return wrap_error(e, 400)
@@ -30,13 +42,13 @@ def init_database():
 @vector_db_api.route("/vectordb/messages", methods=['POST'])
 def add_messages():
     try:
-        phone, bot_role = get_basic_info()
+        info = recv_info()
         contents, roles = format_messages(request.json['messages'])
     except KeyError as e:
         return wrap_response(repr(e), 400)
 
     try:
-        vector_db.append_messages(phone, bot_role, contents, roles)
+        vector_db.append_messages(info, contents, roles)
         return wrap_response()
     except FileNotFoundError:
         return wrap_response('user not found', 404)
@@ -48,9 +60,8 @@ def add_messages():
 def get_messages():
     try:
         # Notice: Get Request here
-        phone = request.args.get('phone')
-        bot_role = request.args.get('botRole')
-        messages = vector_db.get_messages(phone, bot_role)
+        info = recv_info_from_param()
+        messages = vector_db.get_messages(info)
         return wrap_response({
             "messages": messages
         })  
@@ -62,8 +73,8 @@ def get_messages():
 @vector_db_api.route("/vectordb/messages/all", methods=['DELETE'])
 def clear_messages():
     try:
-        phone, bot_role = get_basic_info()
-        vector_db.clear_messages(phone, bot_role)
+        info = recv_info()
+        vector_db.clear_messages(info)
         return wrap_response()
     except KeyError as e:
         return wrap_response(repr(e), 400)
