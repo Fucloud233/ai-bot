@@ -1,12 +1,12 @@
 {
-    "llmKind": "chatGPT",
+    "botKind": "gpt",
     "databasePath": "",
     "key": {
-        "erine": {
+        "ernie": {
             "apiType": "aistudio",
             "accessToken": "<>"
         },
-        "chatGPT": {
+        "gpt": {
             "apiKey": "sk-<>"
         }
     }

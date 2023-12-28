@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 
 class ErineConfig:
     ApiType = None
@@ -13,7 +14,7 @@ class ErineConfig:
         ErineConfig.AccessToken = info.get("accessToken")
 
 
-class ChatGPTConfig:
+class GPTConfig:
     ApiKey = None
 
     @staticmethod
@@ -21,31 +22,48 @@ class ChatGPTConfig:
         if info is None:
             return
         
-        ChatGPTConfig.ApiKey = info.get("apiKey")
+        GPTConfig.ApiKey = info.get("apiKey")
+
+        if GPTConfig.ApiKey == None:
+            print("GPT api key is None")
+            exit(1)
+
+
+class BotKind(Enum):
+    Erine = 'ernie'
+    GPT = 'gpt'
+
+    def new(kind):
+        return BotKind(kind)
+    
+    @property
+    def config(self):
+        match self:
+            case BotKind.Erine: return ErineConfig
+            case BotKind.GPT: return GPTConfig
+        
+        return None
         
 
 class Config:
-    LlmKind = None
+    BotKind = None
     # chroma
     DatabasePath = 'data/chroma'
-
-    Erine =  ErineConfig
-    ChatGPT = ChatGPTConfig
 
     @staticmethod
     def init():
         try:
             with open('config.json', 'r') as f:
                 config = json.load(f)
-                Config.LlmKind = config['llmKind']
+
+                # bot_kind
+                bot_kind = BotKind.new(config['botKind'])
+                bot_kind.config.from_file(config['key'].get(bot_kind.value))
+                Config.BotKind = bot_kind
 
                 database_path = config.get('databasePath')
                 if database_path != None and database_path != "":
                     Config.DatabasePath = database_path
-
-                ErineConfig.from_file(config['key'].get('erine'))
-                ChatGPTConfig.from_file(config['key'].get('chatGPT'))
-
         except Exception as e:
             print(repr(e))
             exit(1)
