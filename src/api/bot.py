@@ -5,10 +5,10 @@ from pprint import pprint
 bot_api = Blueprint('bot_api', __name__)
 
 from utils.api import wrap_response, wrap_error, recv_info
-from utils.prompt import wrap_user_prompt, User, Assistant
-from bot import Bot, BotRole
+from utils.prompt import wrap_user_prompt, BotRole, User, Assistant
+from bot.ernie import ErineBot
 
-bot = Bot()
+bot = ErineBot()
 
 # post request
 @bot_api.route("/chat", methods=['POST'])
