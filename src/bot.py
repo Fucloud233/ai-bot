@@ -4,7 +4,7 @@ from typing import List
 from pprint import pprint
 
 from config import Config
-from utils.prompt import wrap_prompt
+from utils.prompt import wrap_prompt, Assistant, User
 
 # https://github.com/PaddlePaddle/ERNIE-Bot-SDK
 
@@ -13,10 +13,6 @@ erniebot.api_type = Config.api_type
 erniebot.access_token = Config.access_token
 
 models = erniebot.Model.list()
-
-# role
-User = 'user'
-Assistant = 'assistant'
 
 class ModelKind(Enum):
     Ernie = 'ernie-bot'
@@ -49,13 +45,17 @@ class Bot:
 
     @staticmethod
     def talk(messages, model_kind: ModelKind=ModelKind.Ernie):
-        response = erniebot.ChatCompletion.create(
-            model=model_kind.value,
-            messages=messages
-        )
-
+        try:
+            response = erniebot.ChatCompletion.create(
+                model=model_kind.value,
+                messages=messages
+            )
+            
+        except erniebot.errors.InvalidArgumentError as e:
+            raise ValueError("messages must have an odd number of elements")
+        
         return response['result']
-    
+
     @staticmethod
     def talk_with_role(messages: List[str], bot_role: BotRole, model_kind: ModelKind=ModelKind.Ernie):
         prompts = wrap_prompt(gen_prompt(bot_role), Bot.FirstPromptDefaultAnswer)

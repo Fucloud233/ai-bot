@@ -44,17 +44,12 @@ def add_messages():
     try:
         info = recv_info()
         contents, roles = format_messages(request.json['messages'])
-    except KeyError as e:
-        return wrap_response(repr(e), 400)
-
-    try:
         vector_db.append_messages(info, contents, roles)
         return wrap_response()
-    except FileNotFoundError:
-        return wrap_response('user not found', 404)
-    except ValueError as e:
+    except (KeyError, ValueError) as e:
         return wrap_response(repr(e), 400)
-
+    except FileNotFoundError as e:
+        return wrap_error(e, 404)
 
 @vector_db_api.route("/vectordb/messages", methods=['GET'])
 def get_messages():
@@ -67,8 +62,8 @@ def get_messages():
         })  
     except KeyError as e:
         return wrap_response(repr(e), 400)
-    except FileNotFoundError:
-        return wrap_response("User or BotRole not found", 404)
+    except FileNotFoundError as e:
+        return wrap_error(e, 404)
 
 @vector_db_api.route("/vectordb/messages/all", methods=['DELETE'])
 def clear_messages():
@@ -79,4 +74,4 @@ def clear_messages():
     except KeyError as e:
         return wrap_response(repr(e), 400)
     except FileNotFoundError as e:
-        return wrap_response(repr(e), 404)
+        return wrap_error(e, 404)
