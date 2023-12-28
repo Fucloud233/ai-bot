@@ -27,8 +27,14 @@ def wrap_response(msg: str='', status_code: int=200):
     return response
 
 def wrap_error(err: Exception, status_code: int):
+    if len(err.args) > 1:
+        message = err.args[0]
+    else:
+        message = repr(err)
+        status_code = 500
+
     resp = make_response({
-        "message": err.args[0]
+        "message": message
     })
     resp.status_code = status_code
     return resp
