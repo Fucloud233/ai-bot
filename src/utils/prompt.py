@@ -1,3 +1,8 @@
+
+# role
+User = 'user'
+Assistant = 'assistant'
+
 def wrap_prompt(prompt, answer: str="好的，我知道了。"):
     # messages must have an odd number of elements
     return [{
