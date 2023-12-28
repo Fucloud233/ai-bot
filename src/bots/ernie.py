@@ -3,13 +3,13 @@ from enum import Enum
 from typing import List
 
 from bot.base import BasicBot
-from utils.config import Config
+from utils.config import ErineConfig
 
 # https://github.com/PaddlePaddle/ERNIE-Bot-SDK
 
 # set api key
-erniebot.api_type = Config.Erine.ApiType
-erniebot.access_token = Config.Erine.AccessToken
+erniebot.api_type = ErineConfig.ApiType
+erniebot.access_token = ErineConfig.AccessToken
 
 models = erniebot.Model.list()
 

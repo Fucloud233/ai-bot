@@ -8,8 +8,10 @@ from utils.prompt import wrap_prompt, BotRole
 class BasicBot:
     FirstPromptDefaultAnswer = "好的，我一定会控制回答字数的"
     # TODO: perfect this prompt
+    # ProjectPrompt = \
+    #     "我现在学习、工作或者生活上有点压力，请你帮我缓解一下我和压力和焦虑。" \
+    #     "请控制你的回答在20个字之间。"
     ProjectPrompt = \
-        "我现在学习、工作或者生活上有点压力，请你帮我缓解一下我和压力和焦虑。" \
         "请控制你的回答在20个字之间。"
 
     def __init__(self):
@@ -55,7 +57,7 @@ def gen_prompt(bot_role: BotRole, bot_role_description: str=""):
     label = bot_role.get_label()
 
     # (1) basic role prompt 
-    basic_prompt =  f"你现在是我的{label}。"
+    basic_prompt =  f"假设你现在是我的{label}，请带入这个身份与与我交谈。"
     # (2) description about role from user
     description = bot_role_description + '\n'
     # (3) some prompt about this project 
