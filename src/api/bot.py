@@ -1,11 +1,12 @@
 from flask import request, Blueprint
 from typing import List
+from pprint import pprint
 
 bot_api = Blueprint('bot_api', __name__)
 
-from utils.api import wrap_response
-from utils.prompt import wrap_user_prompt
-from bot import Bot, BotRole, User, Assistant
+from utils.api import wrap_response, wrap_error, recv_info
+from utils.prompt import wrap_user_prompt, User, Assistant
+from bot import Bot, BotRole
 
 bot = Bot()
 
@@ -37,11 +38,10 @@ def chat_with_role(role_name):
         # generate and return result
         result = bot.talk_with_role(messages, role)
         return wrap_response(result)
-    except ValueError as e:
-        return wrap_response(f"Role '{role_name}' not found", 404)
-    except TypeError as e:
-        print(e.with_traceback())
-        return wrap_response(repr(e), 400)
+    except FileNotFoundError as e:
+        return wrap_error(e, 400)
+    except (ValueError, TypeError) as e:
+        return wrap_error(e, 400)
     
 
 from api.vector_db import vector_db
@@ -50,10 +50,9 @@ from api.vector_db import vector_db
 def chat_with_role_enhance():
     body = request.json
 
-    # 1. catch the message
     try:
-        phone = body['phone']
-        bot_role = BotRole.new(body["botRole"])
+        # 1. catch the message
+        info = recv_info()
         user_message = body['userMessage']
 
         # optional
@@ -65,24 +64,30 @@ def chat_with_role_enhance():
         if history_messages is None:
             history_messages = []
         
-    except KeyError as e:
-        return wrap_response(repr(e), 400)
-    
-    # 2. merge the basic prompt and role
-    try:
-        vector_db.query("18212345678", "你好")
+        # 2. merge the basic prompt and role
+        messages = []
 
-        history_messages.append(wrap_user_prompt(user_message))
+        # (1) similar context
+        context_messages = vector_db.query_with_context(info, user_message)
+        messages.extend(context_messages)
+        # print("context: "); pprint(context_messages)
 
+        # (2) history messages
+        messages.extend(history_messages)
+
+        # (3) user message
+        messages.append(wrap_user_prompt(user_message))
+
+        # 3. talk with bot
         result = bot.talk_with_custom_role(
-            history_messages,
-            bot_role,
+            messages,
+            BotRole.new(info['botRole']),
             bot_role_description
         )
 
-        vector_db.append_messages(phone, [user_message, result], [User, Assistant])
+        # vector_db.append_messages(phone, [user_message, result], [User, Assistant])
 
         return wrap_response(result)
-    except Exception as e:
-        return wrap_response(repr(e), 400)
+    except (KeyError, ValueError) as e:
+        return wrap_error(e, 400)
     
