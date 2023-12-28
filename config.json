@@ -1,4 +1,13 @@
 {
-  "api_type": "aistudio",
-  "access_token": "e9dcd8d16f37f57d543a95fce32926ba1a22d953"
+    "llmKind": "chatGPT",
+    "databasePath": "",
+    "key": {
+        "erine": {
+            "apiType": "aistudio",
+            "accessToken": "<>"
+        },
+        "chatGPT": {
+            "apiKey": "sk-<>"
+        }
+    }
 }

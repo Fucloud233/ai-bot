@@ -3,14 +3,14 @@ from enum import Enum
 from typing import List
 from pprint import pprint
 
-from config import Config
+from utils.config import Config
 from utils.prompt import wrap_prompt, Assistant, User
 
 # https://github.com/PaddlePaddle/ERNIE-Bot-SDK
 
 # set api key
-erniebot.api_type = Config.api_type
-erniebot.access_token = Config.access_token
+erniebot.api_type = Config.Erine.ApiType
+erniebot.access_token = Config.Erine.AccessToken
 
 models = erniebot.Model.list()
 

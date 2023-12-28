@@ -9,10 +9,10 @@ from pprint import pprint
 
 from utils.vector_db import to_messages
 from utils.prompt import Assistant
-from config import Config
+from utils.config import Config
 
 embedding_model = "distiluse-base-multilingual-cased-v1"
-database_path = Config.database_path
+database_path = Config.DatabasePath
 
 def merge_name(phone: str, bot_role):
     return phone + '-' + bot_role
