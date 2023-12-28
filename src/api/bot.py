@@ -6,9 +6,18 @@ bot_api = Blueprint('bot_api', __name__)
 
 from utils.api import wrap_response, wrap_error, recv_info
 from utils.prompt import wrap_user_prompt, BotRole, User, Assistant
-from bot.ernie import ErineBot
+from utils.config import Config, BotKind
 
-bot = ErineBot()
+def get_bot():
+    match Config.BotKind:
+        case BotKind.Erine:
+            from bots.ernie import ErineBot
+            return ErineBot()
+        case BotKind.GPT:
+            from bots.gpt import GPTBot
+            return GPTBot()
+
+bot = get_bot()
 
 # post request
 @bot_api.route("/chat", methods=['POST'])
