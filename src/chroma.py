@@ -72,9 +72,9 @@ class VectorDB:
         self.client.delete_collection(name)
         self.client.create_collection(name)
 
-    def get_messages(self, info):
+    def get_messages(self, info, need_id: bool=False):
         result = self.__get_collection(info).get()
-        return to_messages(result, need_id=True)
+        return to_messages(result, need_id=need_id)
     
     # TODO: check duplicated message between query messages and history messages
     def query(self, info, message: str):

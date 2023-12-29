@@ -4,31 +4,10 @@ vector_db_api = Blueprint('vector_db_api', __name__)
 
 from chroma import VectorDB
 from utils.vector_db import format_messages
-from utils.api import wrap_response, wrap_error
+from utils.api import wrap_response, wrap_error, recv_info, recv_info_from_param
 
 # vector database - chromadb
 vector_db = VectorDB()
-
-def recv_info():
-    try:
-        phone = request.json['phone']
-        bot_role = request.json['botRole']
-    except:
-        raise KeyError("key info not found")
-
-    return {
-        "phone": phone, 
-        "botRole": bot_role
-    }
-
-def recv_info_from_param():
-    try:
-        return {
-            "phone": request.args.get('phone'),
-            "botRole": request.args.get('botRole')
-        }
-    except:
-        raise KeyError("key info not found")
 
 @vector_db_api.route("/vectordb/init", methods=['POST'])
 def init_database():
@@ -56,7 +35,14 @@ def get_messages():
     try:
         # Notice: Get Request here
         info = recv_info_from_param()
-        messages = vector_db.get_messages(info)
+        
+        # whether it will return with id
+        try:
+            need_id = int(request.args.get('needId')) == 1
+        except ValueError:
+            need_id = False
+
+        messages = vector_db.get_messages(info, need_id)
         return wrap_response({
             "messages": messages
         })  
