@@ -22,6 +22,7 @@ class ErineBot(BasicBot):
     model_kind = ModelKind=ModelKind.Ernie
 
     def __init__(self):
+        super().__init__()
         pass
 
     def _call_api(self, messages: List[str]):

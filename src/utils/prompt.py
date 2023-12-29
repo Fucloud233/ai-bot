@@ -20,15 +20,20 @@ class BotRole(Enum):
             case BotRole.Friend: return "朋友"
             case BotRole.Doctor: return "心理医生"
 
-def wrap_prompt(prompt, answer: str="好的，我知道了。"):
-    # messages must have an odd number of elements
-    return [{
+def wrap_prompt(prompt, answer: str=""):
+    messages = [{
         "role": "user",
         "content": prompt
-    }, {
-        "role": "assistant",
-        "content": answer
     }]
+
+    # messages must have an odd number of elements
+    if answer != "":
+        messages.append({
+            "role": "user",
+            "content": prompt
+        })
+
+    return messages
 
 
 def wrap_user_prompt(prompt):

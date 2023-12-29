@@ -78,8 +78,8 @@ def chat_with_role_enhance():
 
         # (1) similar context
         context_messages = vector_db.query_with_context(info, user_message)
+        # # summarized_context = bot.summarize_history_messages(context_messages)
         messages.extend(context_messages)
-        # print("context: "); pprint(context_messages)
 
         # (2) history messages
         messages.extend(history_messages)
@@ -91,10 +91,11 @@ def chat_with_role_enhance():
         result = bot.talk_with_custom_role(
             messages,
             BotRole.new(info['botRole']),
-            bot_role_description
+            bot_role_description,
+            # summarized_context
         )
 
-        # vector_db.append_messages(phone, [user_message, result], [User, Assistant])
+        # vector_db.append_messages(info, [user_message, result], [User, Assistant])
 
         return wrap_response(result)
     except (KeyError, ValueError) as e:

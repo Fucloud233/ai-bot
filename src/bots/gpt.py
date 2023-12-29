@@ -3,7 +3,7 @@ from typing import List
 from pprint import pprint
 
 from bots.base import BasicBot
-from utils.config import GPTConfig
+from utils.config import GPTConfig, BotKind
 
 api_key = GPTConfig.ApiKey
 
@@ -13,11 +13,12 @@ class GPTBot(BasicBot):
     model_type = "gpt-3.5-turbo"
 
     def __init__(self):
+        super().__init__()
         self.client = openai.OpenAI(api_key=api_key)
+
+        self._kind = BotKind.GPT 
     
     def _call_api(self, messages: List[str]) -> str:
-        pprint(messages)
-
         response = self.client.chat.completions.create(
             model=GPTBot.model_type,
             timeout=5,
@@ -25,8 +26,6 @@ class GPTBot(BasicBot):
             stream=False,
             messages=messages
         )
-
-        print(response)
 
         return response.choices[0].message.content
     
