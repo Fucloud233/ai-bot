@@ -8,6 +8,7 @@ bot_api = Blueprint('bot_api', __name__)
 from utils.api import wrap_response, wrap_error, recv_info
 from utils.prompt import wrap_user_prompt, BotRole, User, Assistant
 from utils.config import Config, BotKind
+import utils.api as apiUtils
 
 def get_bot():
     match Config.BotKind:
@@ -94,7 +95,7 @@ def chat_with_role_enhance():
         # 3. talk with bot
         result = bot.talk_with_custom_role(
             messages,
-            BotRole.new(info['botRole']),
+            BotRole.new(info.bot_role),
             bot_role_description,
             # summarized_context
         )
@@ -104,7 +105,7 @@ def chat_with_role_enhance():
 
         vector_db.append_messages(info, [user_message, result], [User, Assistant], [query_time, answer_time])
 
-        return wrap_response(result)
+        return apiUtils.wrap_answer(result)
     except (KeyError, ValueError) as e:
         return wrap_error(e, 400)
     

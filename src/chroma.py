@@ -8,21 +8,12 @@ from chromadb.utils import embedding_functions
 from pprint import pprint
 from datetime import datetime
 
-from utils.vector_db import to_messages
+from utils.vector_db import DBIndex, to_messages
 from utils.prompt import Assistant
 from utils.config import Config
 
 embedding_model = "distiluse-base-multilingual-cased-v1"
 database_path = Config.DatabasePath
-
-def merge_name(phone: str, bot_role):
-    return phone + '-' + bot_role
-
-def unwrap_name(info):
-    try:
-        return info["phone"] + '-' + info["botRole"]
-    except KeyError:
-        raise KeyError("key info not found")
     
 class VectorDB:
     def __init__(self):
@@ -30,15 +21,15 @@ class VectorDB:
         self.embedding_function = embedding_functions \
             .SentenceTransformerEmbeddingFunction(model_name=embedding_model)
         
-    def init(self, info):
+    def init(self, index: DBIndex):
         try:
-            self.client.create_collection(name=unwrap_name(info))
+            self.client.create_collection(name=index.to_name())
         except:
             raise ValueError('botRole has existed')
 
-    def __get_collection(self, info):
+    def __get_collection(self, index: DBIndex):
         try:   
-            database_name = unwrap_name(info)
+            database_name = index.to_name()
             return self.client.get_collection(
                 database_name, 
                 embedding_function=self.embedding_function
@@ -51,7 +42,7 @@ class VectorDB:
     if the times is None, we'll set the time to now
     '''
     def append_messages(
-        self, info, 
+        self, index: DBIndex,
         contents: List[str], 
         roles: List[str], 
         times: List[datetime]=None
@@ -62,13 +53,13 @@ class VectorDB:
         if len(contents) != len(roles) or len(contents) != len(times):
             raise ValueError('the length of elements is not same')
 
-        collection = self.__get_collection(info)
+        collection = self.__get_collection(index)
         start_id = collection.count()
         
         # generate id for those content
         ids = [start_id + i for i in range(0, len(contents)) ]        
 
-        self.__get_collection(info) \
+        self.__get_collection(index) \
             .add(
                 # Notice: use leading zeros to order the message
                 ids=["%5d"%id for id in ids], 
@@ -81,19 +72,19 @@ class VectorDB:
                 } for (role, id, time) in zip(roles, ids, times)]
             )
         
-    def clear_messages(self, info):
-        name = unwrap_name(info)
+    def clear_messages(self, index: DBIndex):
+        name = index.to_name()
 
         self.client.delete_collection(name)
         self.client.create_collection(name)
 
-    def get_messages(self, info, need_id: bool=False, need_time: bool=False):
-        result = self.__get_collection(info).get()
+    def get_messages(self, index: DBIndex, need_id: bool=False, need_time: bool=False):
+        result = self.__get_collection(index).get()
         return to_messages(result, need_id=need_id, need_time=need_time)
     
     # TODO: check duplicated message between query messages and history messages
-    def query(self, info, message: str):
-        collection = self.__get_collection(info)
+    def query(self, index: DBIndex, message: str):
+        collection = self.__get_collection(index)
         result = collection.query(query_texts=message, n_results=1)
 
         messages = to_messages(result, is_multiple=True)
@@ -101,11 +92,11 @@ class VectorDB:
 
         return messages
 
-    def query_with_context(self, info, message: str, window_size: int=3):
+    def query_with_context(self, index: DBIndex, message: str, window_size: int=3):
         """it will not only return the related message, but also the context
 
         Args:
-            info (_type_): None
+            index (DBIndex): the index of the database
             message (str): the identifier to the database.
             window_size (int, optional): the maximum number of message pairs will return. 
                 Defaults to 3.
@@ -114,7 +105,7 @@ class VectorDB:
             List[str]: messages
         """
 
-        collection = self.__get_collection(info)
+        collection = self.__get_collection(index)
         
         # 1. query the most similar message about this message
         result = collection.query(query_texts=message, n_results=1)

@@ -1,6 +1,25 @@
 from datetime import datetime
 from chromadb import QueryResult
 
+PHONE = 'phone'
+BOT_ROLE = 'botRole'
+
+class DBIndex:
+    def __init__(self, phone: str, bot_role: str):
+        self.__phone = phone
+        self.__bot_role = bot_role
+
+    @property
+    def phone(self) -> str:
+        return self.__phone
+    
+    @property
+    def bot_role(self) -> str:
+        return self.__bot_role
+    
+    def to_name(self) -> str:
+        return self.phone + '-' + self.bot_role
+
 def format_messages(messages):
     contents = [message['content'] for message in messages]
     roles = [message['role'] for message in messages]
