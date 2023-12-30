@@ -20,6 +20,15 @@ def recv_info_from_param():
         }
     except:
         raise KeyError("key info not found")
+    
+def recv_bool_from_parm(name, default: bool=False):
+    value = default
+    try:
+        value = int(request.args.get(name)) == 1
+    except:
+        pass
+    
+    return value
 
 def wrap_response(msg: str='', status_code: int=200):
     response = make_response(msg)

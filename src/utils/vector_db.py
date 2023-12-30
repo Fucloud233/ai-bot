@@ -1,3 +1,4 @@
+from datetime import datetime
 from chromadb import QueryResult
 
 def format_messages(messages):
@@ -20,7 +21,24 @@ def format_messages(messages):
 def unwrap_array(array, is_multiple: bool):
     return array[0] if is_multiple else array
 
-def to_messages(result: QueryResult, is_multiple: bool=False, need_id: bool=False):
+def to_messages(
+    result: QueryResult, 
+    is_multiple: bool=False, 
+    need_id: bool=False,
+    need_time: bool=False
+):
+    """convert QueryResult to Message {role, content, time}
+
+    Args:
+        result (QueryResult): the QueryResult
+        is_multiple (bool, optional): if there are multiple documents in result, 
+            it will select the first. Defaults to False.
+        need_id (bool, optional): whether return id. Defaults to False.
+        need_time (bool, optional): whether return time. Defaults to False.
+
+    Returns:
+        List[str]: Messages
+    """
     documents = unwrap_array(result['documents'], is_multiple)
     metadatas = unwrap_array(result['metadatas'], is_multiple)
 
@@ -35,6 +53,18 @@ def to_messages(result: QueryResult, is_multiple: bool=False, need_id: bool=Fals
     if need_id:
         for (message, metadata) in zip(messages, metadatas):
             message['id'] = metadata['id']
+    if need_time:
+        for (message, metadata) in zip(messages, metadatas):
+            try:
+                # Notice: convert timestamp to string
+                message['time'] = datetime.strftime(
+                    datetime.fromtimestamp(metadata['time']), 
+                    '%Y-%m-%d %H:%M:%S'
+                )
+
+                print(message['time'])
+            except KeyError:
+                pass
 
     return messages
     

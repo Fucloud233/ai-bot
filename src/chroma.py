@@ -6,6 +6,7 @@ import chromadb
 from typing import List
 from chromadb.utils import embedding_functions
 from pprint import pprint
+from datetime import datetime
 
 from utils.vector_db import to_messages
 from utils.prompt import Assistant
@@ -45,9 +46,21 @@ class VectorDB:
         except ValueError:
             raise FileNotFoundError(f"database '{database_name}' not found")
 
-    def append_messages(self, info, contents: List[str], roles: List[str]):
-        if len(contents) != len(roles):
-            raise ValueError('the length of contents is not equal with the roles')
+    '''
+    append message to database,
+    if the times is None, we'll set the time to now
+    '''
+    def append_messages(
+        self, info, 
+        contents: List[str], 
+        roles: List[str], 
+        times: List[datetime]=None
+    ):
+        if times == None:
+            times = [datetime.now()] * 3
+
+        if len(contents) != len(roles) or len(contents) != len(times):
+            raise ValueError('the length of elements is not same')
 
         collection = self.__get_collection(info)
         start_id = collection.count()
@@ -55,26 +68,28 @@ class VectorDB:
         # generate id for those content
         ids = [start_id + i for i in range(0, len(contents)) ]        
 
-        print(roles, ids)
         self.__get_collection(info) \
             .add(
-                ids=[str(id) for id in ids], 
+                # Notice: use leading zeros to order the message
+                ids=["%5d"%id for id in ids], 
                 documents=contents, 
                 metadatas=[{
                     "id": id,
                     "role": role,
-                } for role, id in zip(roles, ids)]
+                    # Notice: chroma can't receive datetime, so we should use timestamp
+                    "time": time.timestamp()
+                } for (role, id, time) in zip(roles, ids, times)]
             )
-    
+        
     def clear_messages(self, info):
         name = unwrap_name(info)
 
         self.client.delete_collection(name)
         self.client.create_collection(name)
 
-    def get_messages(self, info, need_id: bool=False):
+    def get_messages(self, info, need_id: bool=False, need_time: bool=False):
         result = self.__get_collection(info).get()
-        return to_messages(result, need_id=need_id)
+        return to_messages(result, need_id=need_id, need_time=need_time)
     
     # TODO: check duplicated message between query messages and history messages
     def query(self, info, message: str):
@@ -85,21 +100,28 @@ class VectorDB:
         print(messages)
 
         return messages
-    
-    '''
-    it will not only return the related message,
-    but also the context
 
-    Parameters:
-        info: the identifier to the database
-        windows_size: the maximum number of message pairs will return
-    '''
     def query_with_context(self, info, message: str, window_size: int=3):
+        """it will not only return the related message, but also the context
+
+        Args:
+            info (_type_): None
+            message (str): the identifier to the database.
+            window_size (int, optional): the maximum number of message pairs will return. 
+                Defaults to 3.
+
+        Returns:
+            List[str]: messages
+        """
+
         collection = self.__get_collection(info)
         
         # 1. query the most similar message about this message
         result = collection.query(query_texts=message, n_results=1)
-        message = to_messages(result, is_multiple=True, need_id=True)[0]
+        similar_messages = to_messages(result, is_multiple=True, need_id=True)
+        if len(similar_messages) == 0:
+            return []
+        message = similar_messages[0]
 
         # 2. get the query message instead of answer message from assistant
         id = message['id']

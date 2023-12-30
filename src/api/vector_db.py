@@ -5,6 +5,7 @@ vector_db_api = Blueprint('vector_db_api', __name__)
 from chroma import VectorDB
 from utils.vector_db import format_messages
 from utils.api import wrap_response, wrap_error, recv_info, recv_info_from_param
+import utils.api as apiUtils
 
 # vector database - chromadb
 vector_db = VectorDB()
@@ -37,12 +38,10 @@ def get_messages():
         info = recv_info_from_param()
         
         # whether it will return with id
-        try:
-            need_id = int(request.args.get('needId')) == 1
-        except ValueError:
-            need_id = False
+        need_id = apiUtils.recv_bool_from_parm('needId')
+        need_time = apiUtils.recv_bool_from_parm('needTime')
 
-        messages = vector_db.get_messages(info, need_id)
+        messages = vector_db.get_messages(info, need_id, need_time)
         return wrap_response({
             "messages": messages
         })  

@@ -1,6 +1,7 @@
 from flask import request, Blueprint
 from typing import List
 from pprint import pprint
+from datetime import datetime
 
 bot_api = Blueprint('bot_api', __name__)
 
@@ -60,6 +61,9 @@ def chat_with_role_enhance():
     body = request.json
 
     try:
+        # record user's message time (query)
+        query_time = datetime.now()
+
         # 1. catch the message
         info = recv_info()
         user_message = body['userMessage']
@@ -95,7 +99,10 @@ def chat_with_role_enhance():
             # summarized_context
         )
 
-        # vector_db.append_messages(info, [user_message, result], [User, Assistant])
+        # record bot's message time (answer)
+        answer_time = datetime.now()
+
+        vector_db.append_messages(info, [user_message, result], [User, Assistant], [query_time, answer_time])
 
         return wrap_response(result)
     except (KeyError, ValueError) as e:
