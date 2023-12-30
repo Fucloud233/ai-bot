@@ -11,6 +11,8 @@ from datetime import datetime
 from utils.vector_db import DBIndex, to_messages
 from utils.prompt import Assistant
 from utils.config import Config
+# import utils.time as timeUtils
+from utils.time import get_now_timestamp, MINUTE
 
 embedding_model = "distiluse-base-multilingual-cased-v1"
 database_path = Config.DatabasePath
@@ -80,6 +82,40 @@ class VectorDB:
 
     def get_messages(self, index: DBIndex, need_id: bool=False, need_time: bool=False):
         result = self.__get_collection(index).get()
+        return to_messages(result, need_id=need_id, need_time=need_time)
+    
+    def get_nearest_messages(self, index: DBIndex, 
+        number: int=10, offset: int=0, n: int=10,
+        need_id: bool=False, need_time: bool=False
+    ):
+        """return the message in n minutes
+
+        Args:
+            index (DBIndex): database index
+            number (int, optional): maximum number of messages to return . Defaults to 10.
+            offset (int, optional): the offset. Defaults to 0.
+            n (int, optional): unit of n is minutes. Defaults to 10.
+
+        Returns:
+            List[str]: nearest messages
+        """
+
+        collection = self.__get_collection(index)
+        count = collection.count()
+
+        begin_id = count - offset - number
+        end_id = count - offset
+        print(begin_id, end_id)
+        
+        condition = [
+            { "id": { "$gte": begin_id }},
+            { "id": { "$lt": end_id }}
+        ]
+        
+        if n != -1:
+            condition.append({'time': {"$gte": get_now_timestamp() - n * MINUTE}})
+
+        result = collection.get(where={"$and": condition})
         return to_messages(result, need_id=need_id, need_time=need_time)
     
     # TODO: check duplicated message between query messages and history messages
