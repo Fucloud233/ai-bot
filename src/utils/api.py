@@ -2,27 +2,36 @@ from flask import make_response, request
     
 from utils.vector_db import DBIndex, PHONE, BOT_ROLE
 
-def recv_info() -> DBIndex:
+def body_index() -> DBIndex:
     try:
         body = request.json
         return DBIndex(body[PHONE], body[BOT_ROLE])
     except:
         raise KeyError("key info not found")
 
-def recv_info_from_param() -> DBIndex:
+def param_index() -> DBIndex:
     try:
         args = request.args
         return DBIndex(args[PHONE], args[BOT_ROLE])
     except:
         raise KeyError("key info not found")
     
-def recv_bool_from_parm(name, default: bool=False):
+def param_bool(name, default: bool=False):
     value = default
     try:
         value = int(request.args.get(name)) == 1
     except:
         pass
     
+    return value
+
+def param_int(name, default: bool=0):
+    value = default
+    try:
+        value = int(request.args.get(name))
+    except:
+        pass
+
     return value
 
 def wrap_response(msg: str='', status_code: int=200):

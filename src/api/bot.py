@@ -5,7 +5,7 @@ from datetime import datetime
 
 bot_api = Blueprint('bot_api', __name__)
 
-from utils.api import wrap_response, wrap_error, recv_info
+from utils.api import wrap_response, wrap_error
 from utils.prompt import wrap_user_prompt, BotRole, User, Assistant
 from utils.config import Config, BotKind
 import utils.api as apiUtils
@@ -66,7 +66,7 @@ def chat_with_role_enhance():
         query_time = datetime.now()
 
         # 1. catch the message
-        info = recv_info()
+        info = apiUtils.body_index()
         user_message = body['userMessage']
 
         # optional
