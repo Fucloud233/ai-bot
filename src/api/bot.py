@@ -57,6 +57,33 @@ def chat_with_role(role_name):
 
 from api.vector_db import vector_db
 
+def merge_messages(index, user_message):
+    messages = []
+
+    # (1) similar context
+    similar = vector_db.query_with_context(index, user_message)
+
+    # (2) history messages
+    history = vector_db.get_nearest_messages(index, n=2)
+
+    print("similar: ", similar.begin, similar.end)
+    print("history: ", history.begin, history.end)
+
+    # (3) merge similar and history messages
+    if similar.end >= history.begin:
+        history_messages = history.messages[similar.end:]
+        messages.extend(similar.messages)
+        messages.extend(history_messages)
+        summarized = ""
+    else:
+        messages.extend(history.messages)
+        summarized = bot.summarize_history_messages(similar.messages)
+        
+    # (4) user message
+    messages.append(wrap_user_prompt(user_message))
+    
+    return messages, summarized
+
 @bot_api.route("/chat/enhance", methods=['POST'])
 def chat_with_role_enhance():
     body = request.json
@@ -66,44 +93,30 @@ def chat_with_role_enhance():
         query_time = datetime.now()
 
         # 1. catch the message
-        info = apiUtils.body_index()
+        index = apiUtils.body_index()
         user_message = body['userMessage']
 
         # optional
         bot_role_description = body.get("BotRoleDescription")
-        history_messages: List = body.get("historyMessages")
 
         if bot_role_description is None:
             bot_role_description = ""
-        if history_messages is None:
-            history_messages = []
         
         # 2. merge the basic prompt and role
-        messages = []
-
-        # (1) similar context
-        context_messages = vector_db.query_with_context(info, user_message)
-        # # summarized_context = bot.summarize_history_messages(context_messages)
-        messages.extend(context_messages)
-
-        # (2) history messages
-        messages.extend(history_messages)
-
-        # (3) user message
-        messages.append(wrap_user_prompt(user_message))
+        messages, summarized = merge_messages(index, user_message)
 
         # 3. talk with bot
         result = bot.talk_with_custom_role(
             messages,
-            BotRole.new(info.bot_role),
+            BotRole.new(index.bot_role),
             bot_role_description,
-            # summarized_context
+            summarized
         )
 
         # record bot's message time (answer)
         answer_time = datetime.now()
 
-        vector_db.append_messages(info, [user_message, result], [User, Assistant], [query_time, answer_time])
+        vector_db.append_messages(index, [user_message, result], [User, Assistant], [query_time, answer_time])
 
         return apiUtils.wrap_answer(result)
     except (KeyError, ValueError) as e:

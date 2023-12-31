@@ -8,7 +8,7 @@ from chromadb.utils import embedding_functions
 from pprint import pprint
 from datetime import datetime
 
-from utils.vector_db import DBIndex, to_messages
+from utils.vector_db import DBIndex, DBResult, to_messages
 from utils.prompt import Assistant
 from utils.config import Config
 # import utils.time as timeUtils
@@ -87,7 +87,7 @@ class VectorDB:
     def get_nearest_messages(self, index: DBIndex, 
         number: int=10, offset: int=0, n: int=10,
         need_id: bool=False, need_time: bool=False
-    ):
+    ) -> DBResult:
         """return the message in n minutes
 
         Args:
@@ -97,7 +97,7 @@ class VectorDB:
             n (int, optional): unit of n is minutes. Defaults to 10.
 
         Returns:
-            List[str]: nearest messages
+            DBResult: nearest messages
         """
 
         collection = self.__get_collection(index)
@@ -105,7 +105,6 @@ class VectorDB:
 
         begin_id = count - offset - number
         end_id = count - offset
-        print(begin_id, end_id)
         
         condition = [
             { "id": { "$gte": begin_id }},
@@ -116,7 +115,12 @@ class VectorDB:
             condition.append({'time': {"$gte": get_now_timestamp() - n * MINUTE}})
 
         result = collection.get(where={"$and": condition})
-        return to_messages(result, need_id=need_id, need_time=need_time)
+        messages = to_messages(result, need_id=need_id, need_time=need_time)
+        # Notice: update the begin_id
+        begin_id = end_id - len(messages)
+
+        return DBResult(messages, begin_id, end_id)
+
     
     # TODO: check duplicated message between query messages and history messages
     def query(self, index: DBIndex, message: str):
@@ -128,7 +132,7 @@ class VectorDB:
 
         return messages
 
-    def query_with_context(self, index: DBIndex, message: str, window_size: int=3):
+    def query_with_context(self, index: DBIndex, message: str, window_size: int=3) -> DBResult:
         """it will not only return the related message, but also the context
 
         Args:
@@ -138,7 +142,7 @@ class VectorDB:
                 Defaults to 3.
 
         Returns:
-            List[str]: messages
+            DBResult
         """
 
         collection = self.__get_collection(index)
@@ -147,7 +151,7 @@ class VectorDB:
         result = collection.query(query_texts=message, n_results=1)
         similar_messages = to_messages(result, is_multiple=True, need_id=True)
         if len(similar_messages) == 0:
-            return []
+            return DBResult([], -1, -1)
         message = similar_messages[0]
 
         # 2. get the query message instead of answer message from assistant
@@ -156,20 +160,18 @@ class VectorDB:
 
         # 3. get the begin and end index of context
         ahead_size = int(window_size / 2)
-        begin_id = id - ahead_size * 2
+        begin_id = max(id - ahead_size * 2, 0)
         end_id = id + (window_size - ahead_size) * 2
         
         # 4. using bool condition to get the message in this context
         context_result = collection.get(where={
-            "id": {
-                "$gte": begin_id
-            },
-            "id": {
-                "$lt": end_id
-            }
+            "$and": [
+                {"id": {"$gte": begin_id}},
+                {"id": {"$lt": end_id}}
+            ]
         })
 
-        return to_messages(context_result)
+        return DBResult(to_messages(context_result), begin_id, end_id)
 
     def debug(self):
         print("debug: ", self.client.list_collections())

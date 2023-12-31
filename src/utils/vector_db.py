@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 from chromadb import QueryResult
 
 PHONE = 'phone'
@@ -19,6 +20,33 @@ class DBIndex:
     
     def to_name(self) -> str:
         return self.phone + '-' + self.bot_role
+    
+class DBResult:
+    def __init__(self, messages: List[str], begin_id: int, end_id: int):
+        self.__messages = messages
+        self.__begin_id = begin_id
+        self.__end_id = end_id
+
+    def format(self):
+        contents = [message['content'] for message in self.messages]
+        roles = [message['role'] for message in self.messages]
+        return contents, roles
+    
+    @property
+    def messages(self):
+        return self.__messages
+
+    @property
+    def begin(self):
+        return self.__begin_id
+
+    @property
+    def end(self):
+        return self.__end_id
+    
+    @property
+    def size(self):
+        return self.__end_id - self.__begin_id
 
 def format_messages(messages):
     contents = [message['content'] for message in messages]
@@ -80,8 +108,6 @@ def to_messages(
                     datetime.fromtimestamp(metadata['time']), 
                     '%Y-%m-%d %H:%M:%S'
                 )
-
-                print(message['time'])
             except KeyError:
                 pass
 
