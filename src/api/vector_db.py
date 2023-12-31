@@ -53,7 +53,7 @@ def get_messages():
 @vector_db_api.route("/vectordb/messages/nearest", methods=['GET'])
 def get_nearest_messages():
     try:
-        messages = vector_db.get_nearest_messages(
+        result = vector_db.get_nearest_messages(
             apiUtils.param_index(),
             apiUtils.param_int("number", 10),
             apiUtils.param_int("offset", 0),
@@ -62,7 +62,7 @@ def get_nearest_messages():
             apiUtils.param_bool("needTime")
         )
         return wrap_response({
-            "messages": messages
+            "messages": result.messages
         })  
     except KeyError as e:
         return wrap_response(repr(e), 400)
@@ -73,7 +73,7 @@ def get_nearest_messages():
 @vector_db_api.route("/vectordb/messages/all", methods=['DELETE'])
 def clear_messages():
     try:
-        info = apiUtils.body_info()
+        info = apiUtils.body_index()
         vector_db.clear_messages(info)
         return wrap_response()
     except KeyError as e:
