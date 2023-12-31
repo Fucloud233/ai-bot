@@ -132,7 +132,7 @@ class VectorDB:
 
         return messages
 
-    def query_with_context(self, index: DBIndex, message: str, window_size: int=3) -> DBResult:
+    def query_with_context(self, index: DBIndex, message: str, window_size: int=3, threshold: float=1) -> DBResult:
         """it will not only return the related message, but also the context
 
         Args:
@@ -149,9 +149,16 @@ class VectorDB:
         
         # 1. query the most similar message about this message
         result = collection.query(query_texts=message, n_results=1)
-        similar_messages = to_messages(result, is_multiple=True, need_id=True)
-        if len(similar_messages) == 0:
+
+        if len(result["distances"]) == 0:
             return DBResult([], -1, -1)
+        
+        # print("threshold: ", result["distances"][0])
+        # print("document: ", result["documents"][0])
+        if result["distances"][0][0] > threshold:
+            return DBResult([], -1, -1)
+        
+        similar_messages = to_messages(result, is_multiple=True, need_id=True)
         message = similar_messages[0]
 
         # 2. get the query message instead of answer message from assistant
