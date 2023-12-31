@@ -122,7 +122,6 @@ class VectorDB:
         return DBResult(messages, begin_id, end_id)
 
     
-    # TODO: check duplicated message between query messages and history messages
     def query(self, index: DBIndex, message: str):
         collection = self.__get_collection(index)
         result = collection.query(query_texts=message, n_results=1)
@@ -150,7 +149,7 @@ class VectorDB:
         # 1. query the most similar message about this message
         result = collection.query(query_texts=message, n_results=1)
 
-        if len(result["distances"]) == 0:
+        if len(result["distances"][0]) == 0:
             return DBResult([], -1, -1)
         
         # print("threshold: ", result["distances"][0])
