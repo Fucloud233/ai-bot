@@ -131,7 +131,7 @@ class VectorDB:
 
         return messages
 
-    def query_with_context(self, index: DBIndex, message: str, window_size: int=3, threshold: float=1) -> DBResult:
+    def query_similar_context(self, index: DBIndex, message: str, window_size: int=3, threshold: float=1) -> DBResult:
         """it will not only return the related message, but also the context
 
         Args:

@@ -61,7 +61,7 @@ def merge_messages(index, user_message):
     messages = []
 
     # (1) similar context
-    similar = vector_db.query_with_context(index, user_message)
+    similar = vector_db.query_similar_context(index, user_message)
 
     # (2) history messages
     history = vector_db.get_nearest_messages(index, n=2)
