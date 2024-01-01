@@ -29,24 +29,3 @@
     -   python: flask, ernie, openai, chroma
 
 > 注意：具体实现请查看其他分支
-
-### Python 后端
-
-#### 使用说明
-
-此部分使用说明请见[此处](./usage/py.md);
-
-#### 文件结构
-
-```lua
-.
-|-- config.json     # 配置信息（主要是调用API的key）
-|-- data
-|   `-- chroma      # 存放向量数据库数据
-`-- src
-    |-- utils       # 包括配置信息读取在内和utils
-    |-- api         # api编写
-    |-- bots        # LLM操作 (目前只实现了ERNIE, GPT)
-    |-- chroma.py   # 向量数据库操作
-    `-- run.py      # 引导启动文件
-```
