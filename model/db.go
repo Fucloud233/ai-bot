@@ -29,5 +29,10 @@ func InitMySQL() {
 	fmt.Println("MySQL inited.", viper.GetString("mysql"))
 
 	// auto create the tables
-	DB.AutoMigrate(UserBasic{}, Message{}, RolePrompt{})
+	DB.AutoMigrate(
+		UserBasic{},
+		// messages are stored in vector db now 
+		// Message{}, 
+		RolePrompt{},
+	)
 }

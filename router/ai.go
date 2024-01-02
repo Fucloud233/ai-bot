@@ -14,11 +14,12 @@ func Router() *gin.Engine {
 	r.POST("login", service.UserLogin)
 	r.POST("register", service.CreateUser)
 
-	r.POST("messages", service.PostMessages)
-	r.POST("message", service.PostMessage)
-	// https://www.flysnow.org/2019/12/13/golang-gin-parameters-in-path
-	r.GET("messages", service.GetNewestMessage)
-	r.DELETE("message/all", service.DeleteAllMessages)
+	/* Notice: we don't need this backend to send and get messages not 
+	 * these functions are moved to python-backend */
+	// r.POST("messages", service.PostMessages)
+	// r.POST("message", service.PostMessage)
+	// r.GET("messages", service.GetNewestMessage)
+	// r.DELETE("message/all", service.DeleteAllMessages)
 
 	r.PUT("role/prompt", service.UpdateRolePrompt)
 	r.GET("role/prompt", service.GetRolePrompt)
