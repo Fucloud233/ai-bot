@@ -1,6 +1,7 @@
 package model
 
 import (
+	"ai-bot/utils"
 	"fmt"
 	"log"
 	"os"
@@ -24,8 +25,9 @@ func InitMySQL() {
 			Colorful:      true,
 		},
 	)
-	DB, _ = gorm.Open(mysql.Open(viper.GetString("mysql.dns")),
+	DB, _ = gorm.Open(mysql.Open(utils.DatabaseConfig.ToDNS()),
 		&gorm.Config{Logger: newLogger})
+
 	fmt.Println("MySQL inited.", viper.GetString("mysql"))
 
 	// auto create the tables
