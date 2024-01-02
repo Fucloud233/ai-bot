@@ -12,11 +12,11 @@ func getApiUrl(path string) string {
 	return "http://localhost:6061" + path
 }
 
-func postRequest(body map[string]interface{}) string {
+func postRequest(apiUrl string, body map[string]interface{}) string {
 	bytesData, _ := json.Marshal(body)
 
 	const contentType = "application/json"
-	resp, err := http.Post(getApiUrl("/chat"), contentType, bytes.NewBuffer([]byte(bytesData)));
+	resp, err := http.Post(apiUrl, contentType, bytes.NewBuffer([]byte(bytesData)));
 
 	if err != nil {
 		return fmt.Sprint(err)
@@ -41,7 +41,7 @@ func wrapBasicPrompt(basicPrompt string, answer string) []model.SimpleMessage {
 	return messages
 }
 
-func ChatWithRole(role string, roleDescription string, historyMessages []model.Message, userMessage string)  string {
+func ChatWithRoleOld(role string, roleDescription string, historyMessages []model.Message, userMessage string)  string {
 	// 1. merge the basic prompt and role 
 	basic_prompt := 	
 		// (1) basic role prompt
@@ -68,5 +68,22 @@ func ChatWithRole(role string, roleDescription string, historyMessages []model.M
 		"messages": messages,
 	}
 
-	return postRequest(body)
+	apiUrl := getApiUrl("/chat")
+
+	return postRequest(apiUrl, body)
+}
+
+// this operation won't merge the message list
+// the merge task will be given to `python backend`
+func ChatWithRole(role string, roleDescription string, historyMessages []model.Message, userMessage string)  string {
+	apiUrl := getApiUrl("/chat")
+
+	body := map[string]interface{}{
+		"botRole": role,
+		"botRoleDescription": roleDescription,
+		"historyMessages": historyMessages,
+		"userMessage": userMessage,
+	}
+
+	return postRequest(apiUrl, body)
 }
