@@ -25,8 +25,13 @@ func InitMySQL() {
 			Colorful:      true,
 		},
 	)
-	DB, _ = gorm.Open(mysql.Open(utils.DatabaseConfig.ToDNS()),
-		&gorm.Config{Logger: newLogger})
+
+	dns := utils.DatabaseConfig.ToDNS();
+	DB, error := gorm.Open(mysql.Open(dns), &gorm.Config{Logger: newLogger})
+	// directly exit if database open error
+	if error != nil {
+		os.Exit(1)
+	}
 
 	fmt.Println("MySQL inited.", viper.GetString("mysql"))
 
