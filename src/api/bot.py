@@ -70,12 +70,12 @@ def merge_messages(index, user_message):
     print("history: ", history.begin, history.end)
 
     # (3) merge similar and history messages
+    summarized = ""
     if similar.end >= history.begin:
         history_messages = history.messages[similar.end:]
         messages.extend(similar.messages)
         messages.extend(history_messages)
-        summarized = ""
-    else:
+    elif similar.begin < similar.end:
         messages.extend(history.messages)
         summarized = bot.summarize_history_messages(similar.messages)
         
