@@ -1,4 +1,5 @@
 import { getApiUrl, getRequest, postRequest, deleteRequest, wrapResult } from './utils'
+import * as utils from './utils'
 
 export async function chat(messages) {
     const apiUrl = getApiUrl('chat')
@@ -18,13 +19,23 @@ export async function chatWithRole(messages, role) {
 }
 
 export async function sendMessage(phone, botRole, message) {
-    const apiUrl = getApiUrl('message')
+    // get botRole description
+    const description = await getRequest(utils.getUserApiUrl('role/prompt'), {
+        phone: phone,
+        botRole: botRole
+    })
+        .then((resp) => {
+            return resp.data['rolePrompt']
+        })
+        .catch(() => {
+            return ''
+        })
 
-    return await postRequest(apiUrl, {
+    return await postRequest(getApiUrl('chat/enhance'), {
         phone: phone,
         botRole: botRole,
-        message: message,
-        duration: 10
+        botRoleDescription: description,
+        userMessage: message
     })
         .then((resp) => {
             return wrapResult(true, resp.data.message)
@@ -35,7 +46,7 @@ export async function sendMessage(phone, botRole, message) {
 }
 
 export async function deleteAllMessage(phone, botRole) {
-    return await deleteRequest(getApiUrl('message/all'), {
+    return await deleteRequest(getApiUrl('vectordb/messages/all'), {
         phone: phone,
         botRole: botRole
     })
@@ -44,18 +55,18 @@ export async function deleteAllMessage(phone, botRole) {
 }
 
 export async function getNewestMessages(phone, botRole, number, offset) {
-    return await getRequest(getApiUrl('messages'), {
+    return await getRequest(getApiUrl('vectordb/messages/nearest'), {
         phone: phone,
         botRole: botRole,
-        num: number,
-        offset: offset
+        number: number,
+        offset: offset,
+        // set -1 to ignore time limitation
+        n: -1
     })
         .then((resp) => {
-            return {
-                data: resp.data['messages']
-            }
+            return { data: resp.data['messages'] }
         })
-        .catch(() => {
-            return []
+        .catch((err) => {
+            return { data: [] }
         })
 }

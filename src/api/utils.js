@@ -63,6 +63,10 @@ export function getApiUrl(name) {
     return apiUrl
 }
 
+export function getUserApiUrl(name) {
+    return '/user/api/' + name
+}
+
 export function wrapResult(flag, data) {
     return {
         flag: flag,

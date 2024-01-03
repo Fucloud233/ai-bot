@@ -172,7 +172,8 @@ export default {
         },
         async pushHistoryMsg() {
             const curUserPhone = this.$store.state.userInfo.phone
-            const result = await getNewestMessages(curUserPhone, this.curRole, 10, this.curMessageList.length)
+            // Notice: the scrollbar won't show if number is low
+            const result = await getNewestMessages(curUserPhone, this.curRole, 15, this.curMessageList.length)
 
             if (result.data.length == 0) {
                 return true
