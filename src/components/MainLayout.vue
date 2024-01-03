@@ -1,12 +1,12 @@
 <template>
     <el-container id="container">
         <el-header id="header">
-            <div class="tool-container" style="margin-left: 10px">
+            <div class="tool-container" style="margin-left: 20px">
                 <slot name="leftTool"> </slot>
             </div>
             <h1 id="title">{{ title }}</h1>
 
-            <div class="tool-container" style="margin-right: 10px">
+            <div class="tool-container" style="margin-right: 20px">
                 <slot name="rightTool"> </slot>
             </div>
         </el-header>

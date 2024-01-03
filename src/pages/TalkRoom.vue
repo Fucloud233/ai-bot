@@ -17,6 +17,7 @@
                     <template #spinner> <span style="display: flex; justify-content: center; padding: 5px; color: gray"> loading</span> </template>
                     <template #complete><div></div> </template>
                 </InfiniteLoading>
+
                 <div v-for="[i, item] of curMessageList.entries()" :key="i" id="message-list">
                     <div class="avatar">
                         <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="avatar"></el-image>
@@ -191,16 +192,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#message-container {
-    display: flex;
-    flex-direction: column;
-    /* padding: 0 20px 10px 20px; */
-    max-height: 90%;
-    width: 100%;
-}
 #message-list {
     display: flex;
-    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 #message-container .message {
