@@ -13,13 +13,13 @@
         </template>
         <template #footer>
             <div class="function-bar">
-                <el-button text class="function-button">
+                <el-button text>
                     <div style="display: flex; flex-direction: column; align-items: center">
                         <el-icon><ChatDotRound /></el-icon>
                         <span style="font-size: 10px; margin: 5px 0 0 0">聊天</span>
                     </div>
                 </el-button>
-                <el-button text class="function-button">
+                <el-button text>
                     <div style="display: flex; flex-direction: column; align-items: center">
                         <el-icon><User /></el-icon>
                         <span style="font-size: 10px; margin: 5px 0 0 0">个人</span>
@@ -95,10 +95,7 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    align-items: center;
     height: 100%;
-}
-.function-button {
-    min-width: 36px;
-    min-height: 36px;
 }
 </style>
