@@ -18,8 +18,8 @@
                     <template #complete><div></div> </template>
                 </InfiniteLoading>
                 <div v-for="[i, item] of curMessageList.entries()" :key="i" id="message-list">
-                    <div class="profile">
-                        <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="profile" style="border-radius: 50%"></el-image>
+                    <div class="avatar">
+                        <el-image :src="curRoleProfileUrl" v-if="item.role == 'assistant'" class="avatar"></el-image>
                     </div>
                     <div class="message" :id="item.role">
                         <div v-loading="checkNeedLoading(i)" style="min-width: 30px" element-loading-background="#f1f1f1">
@@ -227,12 +227,6 @@ export default {
     margin-left: auto;
     color: white;
     background-color: #409eff;
-}
-.profile {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-    border-radius: 50%;
 }
 #talk-container {
     display: flex;

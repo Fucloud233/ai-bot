@@ -20,4 +20,11 @@ body,
     width: 100%;
     height: 100%;
 }
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    border-radius: 5px;
+}
 </style>

@@ -5,7 +5,7 @@
             <div v-for="[i, role] of roleList.entries()" :key="i" :index="String(i)" class="role-container">
                 <el-button @click="this.$router.push(`/talk/${role.name}`)" style="width: 100%; height: 50px; justify-content: start" text>
                     <div style="display: flex; align-items: center; justify-content: start; width: 100%">
-                        <img :src="getProfileUrl(role.name)" class="profile" />
+                        <img :src="getProfileUrl(role.name)" class="avatar" />
                     </div>
                     <span style="font-style: normal">{{ role.label }}</span>
                 </el-button>
@@ -80,13 +80,6 @@ export default {
     padding-bottom: 5px;
     border-bottom: solid 1px #f1f1f1;
 }
-.profile {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-    border-radius: 5px;
-}
-
 .el-icon {
     font-size: 24px;
     /* color: white; */
