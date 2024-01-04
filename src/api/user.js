@@ -1,9 +1,7 @@
-import axios from 'axios'
-
-import { getApiUrl, postRequest, wrapResult } from './utils'
+import { getUserApiUrl, postRequest, wrapResult } from './utils'
 
 export async function register(userInfo) {
-    return await postRequest(getApiUrl('register'), userInfo)
+    return await postRequest(getUserApiUrl('register'), userInfo)
         .then((resp) => {
             return {
                 flag: true
@@ -21,7 +19,7 @@ export async function register(userInfo) {
 }
 
 export async function login(userInfo) {
-    return await postRequest(getApiUrl('login'), userInfo)
+    return await postRequest(getUserApiUrl('login'), userInfo)
         .then((resp) => {
             return {
                 flag: true,
