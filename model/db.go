@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -27,13 +26,14 @@ func InitMySQL() {
 	)
 
 	dns := utils.DatabaseConfig.ToDNS();
-	DB, error := gorm.Open(mysql.Open(dns), &gorm.Config{Logger: newLogger})
+	
+	var err error
+	DB, err = gorm.Open(mysql.Open(dns), &gorm.Config{Logger: newLogger})
 	// directly exit if database open error
-	if error != nil {
+	if err != nil {
+		fmt.Println("MySQL连接错误")
 		os.Exit(1)
 	}
-
-	fmt.Println("MySQL inited.", viper.GetString("mysql"))
 
 	// auto create the tables
 	DB.AutoMigrate(
