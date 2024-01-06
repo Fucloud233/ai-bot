@@ -23,11 +23,21 @@ class VectorDB:
         self.embedding_function = embedding_functions \
             .SentenceTransformerEmbeddingFunction(model_name=embedding_model)
         
-    def init(self, index: DBIndex):
+    def init(self, index: DBIndex, is_strict: bool=True):
+        """initialize database using DBIndex
+        Args:
+            index (DBIndex): the only identifier about database
+            is_strict (bool): it will raise error when meet duplication 
+                if it's strict
+
+        Raises:
+            ValueError: botRole has existed
+        """
         try:
             self.client.create_collection(name=index.to_name())
         except:
-            raise ValueError('botRole has existed')
+            if is_strict:
+                raise ValueError('botRole has existed')
 
     def __get_collection(self, index: DBIndex):
         try:   

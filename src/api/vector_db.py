@@ -3,9 +3,10 @@ from flask import request, Blueprint
 vector_db_api = Blueprint('vector_db_api', __name__)
 
 from chroma import VectorDB
-from utils.vector_db import format_messages
+from utils.vector_db import format_messages, DBIndex
 from utils.api import wrap_response, wrap_error
 import utils.api as apiUtils
+import utils.prompt as promptUtils
 
 # vector database - chromadb
 vector_db = VectorDB()
@@ -17,6 +18,16 @@ def init_database():
         vector_db.init(info)
         return wrap_response()
     except (KeyError, ValueError) as e:
+        return wrap_error(e, 400)
+
+@vector_db_api.route("/vectordb/init/all", methods=['POST'])
+def init_all_roles():
+    try:
+        phone = request.json['phone']
+        for role in promptUtils.BotRole:
+            vector_db.init(DBIndex(phone, role.value), False)
+        return wrap_response()
+    except(KeyError)  as e:
         return wrap_error(e, 400)
 
 @vector_db_api.route("/vectordb/messages", methods=['POST'])
