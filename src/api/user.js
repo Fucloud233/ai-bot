@@ -1,8 +1,16 @@
 import { getUserApiUrl, postRequest, wrapResult } from './utils'
+import * as utils from './utils'
 
+// register: it will complete 2 works
+// 1. add user info into database, and init the role description (go-backend)
+// 2. init vector database to store and query message (py-backend)
 export async function register(userInfo) {
+    postRequest(utils.getApiUrl('vectordb/init/all'), {
+        phone: userInfo['phone']
+    })
+
     return await postRequest(getUserApiUrl('register'), userInfo)
-        .then((resp) => {
+        .then(() => {
             return {
                 flag: true
             }
