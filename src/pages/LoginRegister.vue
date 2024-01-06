@@ -62,7 +62,7 @@ export default {
             isLogin: true,
 
             loginInfo: {
-                phone: '18212345678'
+                // phone: '18212345678'
                 // password: '123456'
             },
             registerInfo: {
