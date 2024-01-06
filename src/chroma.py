@@ -8,7 +8,7 @@ from chromadb.utils import embedding_functions
 from pprint import pprint
 from datetime import datetime
 
-from utils.vector_db import DBIndex, DBResult, to_messages
+from utils.vector_db import DBIndex, DBResult, to_messages, split_name
 from utils.prompt import Assistant
 from utils.config import Config
 # import utils.time as timeUtils
@@ -48,7 +48,20 @@ class VectorDB:
             ) 
         except ValueError:
             raise FileNotFoundError(f"database '{database_name}' not found")
+        
+    def get_database_list(self):
+        names = [ collection.name for collection in self.client.list_collections()]
+        
+        result = {}
+        for name in names:
+            (key, role) = split_name(name)
+            try:
+                result[key].append(role)
+            except KeyError:
+                result[key] = [role]
 
+        return result
+    
     '''
     append message to database,
     if the times is None, we'll set the time to now

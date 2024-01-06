@@ -41,6 +41,18 @@ def add_messages():
         return wrap_response(repr(e), 400)
     except FileNotFoundError as e:
         return wrap_error(e, 404)
+    
+@vector_db_api.route("/vectordb", methods=['GET'])
+def get_database():
+    result = vector_db.get_database_list()
+    
+    return wrap_response({
+        # pre-handle the list of databases
+        "databases:": [{
+            "phone": key,
+            "roles": value
+        } for (key, value) in result.items()]
+    })
 
 @vector_db_api.route("/vectordb/messages", methods=['GET'])
 def get_messages():

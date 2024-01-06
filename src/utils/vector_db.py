@@ -21,6 +21,10 @@ class DBIndex:
     def to_name(self) -> str:
         return self.phone + '-' + self.bot_role
     
+def split_name(name: str) -> (str, str):
+    parts = name.split('-')
+    return (parts[0], parts[1])
+    
 class DBResult:
     def __init__(self, messages: List[str], begin_id: int, end_id: int):
         self.__messages = messages
