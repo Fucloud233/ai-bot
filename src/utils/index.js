@@ -18,3 +18,18 @@ export function getRoleLabel(roleName) {
 export function getRoleProfileUrl(role) {
     return `/src/assets/profile/${role}.png`
 }
+
+export const delimiter = '\n\n'
+
+export const USER = 'user'
+export const ASSISTANT = 'assistant'
+
+/* listener mechanism
+ * encapsulate the interface to split and merge messages
+ */
+export function splitMessages(message) {
+    return message.split(delimiter)
+}
+export function mergeMessages(messages) {
+    return messages.join(delimiter)
+}
