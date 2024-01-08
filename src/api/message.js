@@ -1,6 +1,8 @@
 import { getApiUrl, getRequest, postRequest, deleteRequest, wrapResult } from './utils'
 import * as utils from './utils'
 
+import { splitMessages, USER, ASSISTANT } from '../utils'
+
 export async function chat(messages) {
     const apiUrl = getApiUrl('chat')
 
@@ -64,7 +66,23 @@ export async function getNewestMessages(phone, botRole, number, offset) {
         n: -1
     })
         .then((resp) => {
-            return { data: resp.data['messages'] }
+            let resultMessages = []
+
+            resp.data['messages'].forEach((item) => {
+                if (item.role == ASSISTANT) {
+                    resultMessages.push(item)
+                    return
+                }
+
+                splitMessages(item.content).forEach((content) => {
+                    resultMessages.push({
+                        role: USER,
+                        content: content
+                    })
+                })
+            })
+
+            return { data: resultMessages }
         })
         .catch((err) => {
             return { data: [] }

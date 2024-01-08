@@ -1,7 +1,56 @@
-# Vue 3 + Vite
+# Ai 小助手
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+我们仿造 Wechat 的 UI，设计和实现了 Ai 小助手的 Web 应用。
 
-## Recommended IDE Setup
+## 技术栈
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+-   Vue: 前端开发框架
+-   Element: 组件库
+
+## 特点
+
+在传统的 LLM 对话应用中，用户与机器人的对话总是一问一答的方式进行。
+为了更加模拟显示聊天的场景，我们引入聆听者机制。
+通过该机制，机器人会等待用户输入，知道用户停止输入，
+本应用会将所有的输入打包发送给 LLM，然后生成回答。
+
+## 页面介绍
+
+页面效果截图在[`./screenshots`](./screenshots/)目录中。
+
+### 1. 登录与注册
+
+为了持久化保存相关数据，用户需要通过手机号码注册登录使用。
+
+### 2. 角色选择
+
+当用户成功登录之后，就可以选择角色进行聊天。
+目前我们只提供了 4 个预设的角色，分别是父母、闺蜜、朋友和心理医生。
+
+### 3. 聊天页面
+
+聊天页面是本应用最核心的页面，除了基本的对话功能之外，还包含了其他的子功能。
+
+#### (1) 对话
+
+在选择角色后，就可以进入与解压小助手进行聊天。
+你可以直接在底部的输入框输入消息，然后点击右边的发送按钮发送。
+此后，小助手就会接收你输入的文本，生成回答。
+值得注意的是，在小助手确定接收用户消息时，就会转圈等待，
+此时用户不能发送消息，直到回答内容生成完毕。
+
+由于我们使用了数据库持久化存储了聊天记录，
+所以每次重新打开该页面，之前的聊天内容都会重新加载。
+
+#### (2) 自定义角色提示词
+
+在这些预设的角色，系统只提供了一些比较基础的提示词。
+但我们也提供了接口，让用户可以通过自定义的提示词丰富角色的人格。
+此功能在聊天页面的左上角处，
+点击后会显示之前设置的提示词，用户可以点击编辑按钮对此进行修改。
+
+#### (3) 一键删除聊天记录
+
+为了保护用户的隐私，本应用还提供了一键删除所有聊天记录的功能，
+你可以直接点击输入框左边的的按钮进行删除。
+但注意，消息一旦删除就无法恢复，请妥善操作。

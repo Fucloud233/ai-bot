@@ -71,7 +71,7 @@ import 'v3-infinite-loading/lib/style.css'
 import RolePromptDialog from '../components/RolePromptDialog.vue'
 import MainLayout from '../components/MainLayout.vue'
 import { sendMessage, getNewestMessages, deleteAllMessage } from '../api/message'
-import { getRoleLabel, getRoleProfileUrl } from '../utils'
+import { getRoleLabel, getRoleProfileUrl, mergeMessages } from '../utils'
 
 // https://github.com/element-plus/element-plus/pull/12484
 
@@ -98,7 +98,17 @@ export default {
             showCheckDelete: false,
 
             // talking
-            input: ''
+            input: '',
+
+            /* listener mechanism
+             * 1. when user click send button, the inputCount will increase
+             *  and then it will timer n seconds
+             * 2. when then timer ends, inputCount will decrease
+             * 3. messages will send to bot utils inputCount equal 0
+             */
+            inputList: [],
+            inputCount: 0,
+            delay: 4000
         }
     },
     setup() {
@@ -120,25 +130,20 @@ export default {
             }
 
             this.pushUserMessage(this.input)
-            const messageToSend = this.input
+            this.inputList.push(this.input)
+            this.inputCount += 1
             this.input = ''
 
-            // append empty message
-            this.isReceiving = true
-            this.pushAssistantMessage('')
+            // start a timer to wait user to input
+            setTimeout(() => {
+                this.inputCount -= 1
+                if (this.inputCount != 0) {
+                    return
+                }
 
-            // receive message
-            const phone = this.$store.state.userInfo.phone
-            const result = await sendMessage(phone, this.curRole, messageToSend)
-            if (!result.flag) {
-                // this.pushAssistantMessage(result.data)
-                this.modifyLastMessage('不好意思，我有点事情，稍后再回复你。')
-                this.isReceiving = false
-                return
-            }
-            // update the message
-            this.modifyLastMessage(result.data)
-            this.isReceiving = false
+                this.sendMessage()
+                this.inputList = []
+            }, this.delay)
         },
         async handleDelete() {
             if (this.curMessageList.length != 0) {
@@ -157,6 +162,25 @@ export default {
             } else {
                 $state.loaded()
             }
+        },
+        async sendMessage() {
+            // append empty message
+            this.isReceiving = true
+            this.pushAssistantMessage('')
+
+            // receive message
+            const phone = this.$store.state.userInfo.phone
+            const messageToSend = mergeMessages(this.inputList)
+            const result = await sendMessage(phone, this.curRole, messageToSend)
+            if (!result.flag) {
+                // this.pushAssistantMessage(result.data)
+                this.modifyLastMessage('不好意思，我有点事情，稍后再回复你。')
+                this.isReceiving = false
+                return
+            }
+            // update the message
+            this.modifyLastMessage(result.data)
+            this.isReceiving = false
         },
         pushUserMessage(message) {
             this.pushMessage('user', message)
